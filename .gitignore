@@ -1,0 +1,13 @@
+node_modules/
+sessao/
+sessao-baileys/
+.wwebjs_cache/
+*.log
+qr-code*.png
+config.json
+grupos-cache.json
+grupos-listados.txt
+etiquetas.txt
+grupos.txt
+saida.txt
+erro*.txt

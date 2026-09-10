@@ -1,0 +1,16 @@
+{
+  "pastaArquivos": "C:\\Users\\SEU_USUARIO\\Desktop\\Disparos WhatsApp",
+  "arquivo": "",
+  "grupos": [
+    "Nome exato do grupo 1",
+    "Nome exato do grupo 2"
+  ],
+  "mensagens": [
+    "Bom dia!!\nUma sexta-feira abençoada a todos! 🙏\nSegue o estoque 📦"
+  ],
+  "delayMinSegundos": 30,
+  "delayMaxSegundos": 90,
+  "pausarACadaXGrupos": 5,
+  "pausaMinutos": 10,
+  "horarioEnvio": ""
+}

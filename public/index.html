@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Disparador WhatsApp — Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  h1 { font-size: 22px; }
+  .status { padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+  .status.conectado { background: #14532d; color: #86efac; }
+  .status.conectando, .status.qr { background: #713f12; color: #fde047; }
+  .status.desconectado { background: #7f1d1d; color: #fca5a5; }
+  .card { background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 16px; border: 1px solid #334155; }
+  .card h2 { font-size: 15px; margin-bottom: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+  .linha { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  input[type=text], input[type=number], textarea, select {
+    background: #0f172a; border: 1px solid #475569; color: #e2e8f0;
+    border-radius: 8px; padding: 10px; font-size: 14px; font-family: inherit;
+  }
+  input[type=text] { flex: 1; min-width: 250px; }
+  textarea { width: 100%; min-height: 70px; resize: vertical; }
+  button {
+    background: #2563eb; color: white; border: none; border-radius: 8px;
+    padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  button:hover { background: #1d4ed8; }
+  button.verde { background: #16a34a; }
+  button.verde:hover { background: #15803d; }
+  button.vermelho { background: #dc2626; }
+  button.vermelho:hover { background: #b91c1c; }
+  button.cinza { background: #475569; }
+  button.cinza:hover { background: #64748b; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .arquivo-info { background: #0f172a; border-radius: 8px; padding: 12px; font-size: 14px; margin: 10px 0; }
+  .arquivo-info b { color: #86efac; }
+  .grupos-lista { max-height: 320px; overflow-y: auto; border: 1px solid #475569; border-radius: 8px; padding: 8px; }
+  .grupos-lista label { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+  .grupos-lista label:hover { background: #334155; }
+  .contador { font-size: 13px; color: #94a3b8; margin: 8px 0; }
+  .progresso { background: #0f172a; border-radius: 8px; padding: 14px; margin-top: 12px; display: none; }
+  .barra { height: 10px; background: #334155; border-radius: 5px; overflow: hidden; margin: 8px 0; }
+  .barra > div { height: 100%; background: #16a34a; width: 0%; transition: width 0.5s; }
+  .resultado { margin-top: 12px; font-size: 14px; white-space: pre-wrap; }
+  .log-box { background: #020617; border-radius: 8px; padding: 12px; font-family: Consolas, monospace; font-size: 12px; max-height: 260px; overflow-y: auto; white-space: pre-wrap; color: #a5b4fc; }
+  .aviso { background: #7f1d1d; border-radius: 8px; padding: 10px 14px; margin-top: 8px; font-size: 13px; display: none; }
+  .qr-box { text-align: center; display: none; }
+  .qr-box img { border-radius: 12px; background: white; padding: 8px; }
+  .agenda-linha { display: flex; gap: 10px; align-items: center; }
+  .agenda-linha input[type=text] { width: 90px; min-width: 90px; flex: none; text-align: center; }
+  .ok-msg { color: #86efac; font-size: 13px; margin-left: 8px; }
+  .acoes { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; margin-left: 8px; }
+  .tag.teste { background: #713f12; color: #fde047; }
+  .tag.real { background: #14532d; color: #86efac; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>📲 Disparador WhatsApp — Estoque Diário</h1>
+    <div id="status" class="status desconectado">Carregando...</div>
+  </header>
+
+  <div class="card">
+    <h2>Conexão WhatsApp</h2>
+    <div id="qrBox" class="qr-box">
+      <p style="margin-bottom:8px">Escaneie este QR Code no seu celular: <b>Aparelhos conectados &gt; Conectar aparelho</b></p>
+      <img id="qrImg" width="280" alt="QR Code" />
+    </div>
+    <div id="connMsg" style="font-size:14px"></div>
+  </div>
+
+  <div class="card">
+    <h2>1. Arquivo do estoque</h2>
+    <div class="linha">
+      <input type="text" id="pastaArquivos" placeholder="Pasta dos arquivos Excel" />
+      <button class="cinza" onclick="abrirPasta()">Abrir pasta</button>
+      <button onclick="salvarConfig()">Salvar pasta</button>
+    </div>
+    <div id="arquivoInfo" class="arquivo-info">...</div>
+    <div class="linha">
+      <textarea id="mensagem" placeholder="Mensagem que acompanha o arquivo"></textarea>
+    </div>
+    <div class="linha" style="margin-top:10px">
+      <button onclick="salvarMensagem()">Salvar mensagem</button>
+      <span id="msgSalva" class="ok-msg"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2. Grupos destinatários <span id="gruposTag" class="tag"></span></h2>
+    <div class="linha">
+      <button onclick="atualizarGrupos(this)">🔄 Atualizar lista de grupos</button>
+      <button class="cinza" onclick="marcar46()">➕ Adicionar grupos "46"</button>
+      <button class="cinza" onclick="marcarCuritiba()">➕ Adicionar parceiros Curitiba (sem PAP)</button>
+      <button class="cinza" onclick="limparSelecao()">Limpar seleção</button>
+    </div>
+    <div class="contador" id="contadorGrupos"></div>
+    <div class="grupos-lista" id="gruposLista">Carregando...</div>
+    <div class="linha" style="margin-top:12px; gap:6px">
+      <label style="font-size:13px;color:#94a3b8">Delay entre envios (s):</label>
+      <input type="number" id="delayMin" style="width:70px" min="1" /> a
+      <input type="number" id="delayMax" style="width:70px" min="1" />
+      <label style="font-size:13px;color:#94a3b8;margin-left:10px">Pausa extra a cada</label>
+      <input type="number" id="pausaCada" style="width:70px" min="0" /> envios de
+      <input type="number" id="pausaMin" style="width:70px" min="1" /> min
+      <button onclick="salvarAjustes()">Salvar ajustes</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3. Envio</h2>
+    <div class="acoes">
+      <button class="verde" id="btnTeste" onclick="iniciarEnvio('teste')">🧪 Simular (não envia)</button>
+      <button class="vermelho" id="btnEnviar" onclick="iniciarEnvio('real')">🚀 ENVIAR AGORA</button>
+      <button class="cinza" id="btnParar" onclick="parar()" style="display:none">⏹ Parar</button>
+    </div>
+    <div class="progresso" id="progresso">
+      <div class="linha" style="justify-content:space-between">
+        <span id="progTexto"></span>
+        <span id="progTag"></span>
+      </div>
+      <div class="barra"><div id="barraFill"></div></div>
+      <div class="resultado" id="progResultado"></div>
+    </div>
+    <div class="aviso" id="aviso"></div>
+  </div>
+
+  <div class="card">
+    <h2>4. Agendamento diário</h2>
+    <div class="agenda-linha">
+      <label style="font-size:14px">Enviar todos os dias às</label>
+      <input type="text" id="horario" placeholder="07:30" />
+      <button onclick="salvarAgendamento(this)">Salvar</button>
+      <span id="agendaEstado" style="font-size:13px"></span>
+    </div>
+    <p style="font-size:12px;color:#64748b;margin-top:8px">Deixe o PC ligado e este dashboard aberto. Deixe vazio para desativar.</p>
+  </div>
+
+  <div class="card">
+    <h2>Histórico / Log</h2>
+    <div class="log-box" id="logBox"></div>
+  </div>
+</div>
+
+<script>
+let gruposSelecionados = new Set();
+let gruposCarregados = [];
+let selecaoIniciada = false;
+let cacheKeyLista = '';
+
+async function api(url, body) {
+  const opts = body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {};
+  const r = await fetch(url, opts);
+  return r.json();
+}
+
+function setStatus(e) {
+  const el = document.getElementById('status');
+  el.className = 'status ' + e.conexao;
+  const nomes = { conectado: '🟢 Conectado', conectando: '🟡 Conectando...', qr: '🟡 Aguardando QR', desconectado: '🔴 Desconectado' };
+  el.textContent = nomes[e.conexao] || e.conexao;
+
+  document.getElementById('qrBox').style.display = e.qrDataUrl ? 'block' : 'none';
+  if (e.qrDataUrl) document.getElementById('qrImg').src = e.qrDataUrl;
+
+  document.getElementById('connMsg').textContent = e.ultimoErro || (e.conexao === 'conectado' ? 'Conectado com sucesso.' : '');
+}
+
+function renderGrupos(e) {
+  const cache = e.gruposCache;
+  const container = document.getElementById('gruposLista');
+  if (!cache || !cache.grupos || !cache.grupos.length) {
+    container.innerHTML = '<p style="padding:10px;font-size:13px;color:#94a3b8">Nenhuma lista carregada. Clique em "Atualizar lista de grupos" (precisa estar conectado).</p>';
+    return;
+  }
+  gruposCarregados = cache.grupos;
+
+  if (cacheKeyLista !== cache.atualizadoEm) {
+    cacheKeyLista = cache.atualizadoEm;
+    if (!selecaoIniciada) {
+      selecaoIniciada = true;
+      gruposSelecionados = new Set();
+      for (const ref of e.config.grupos || []) {
+        const g = cache.grupos.find((x) => x.id === ref) ||
+          cache.grupos.find((x) => (x.nome || '').trim().toLowerCase() === String(ref).trim().toLowerCase());
+        gruposSelecionados.add(g ? g.id : ref);
+      }
+    }
+    container.innerHTML = cache.grupos.map((g) =>
+      `<label><input type="checkbox" ${gruposSelecionados.has(g.id) ? 'checked' : ''} onchange="toggleGrupo('${g.id}', this.checked)" /> ${g.nome}</label>`
+    ).join('');
+  } else {
+    document.querySelectorAll('#gruposLista input[type=checkbox]').forEach((cb, i) => {
+      cb.checked = gruposSelecionados.has(gruposCarregados[i].id);
+    });
+  }
+
+  const dt = new Date(cache.atualizadoEm);
+  document.getElementById('gruposTag').textContent = `${cache.grupos.length} grupos — lista de ${dt.toLocaleDateString('pt-BR')}`;
+  atualizarContador();
+}
+
+function toggleGrupo(id, marcado) {
+  if (marcado) gruposSelecionados.add(id); else gruposSelecionados.delete(id);
+  atualizarContador();
+  salvarGrupos();
+}
+
+function atualizarContador() {
+  document.getElementById('contadorGrupos').textContent = `${gruposSelecionados.size} grupo(s) selecionado(s) para receber o estoque`;
+}
+
+function salvarGrupos() {
+  return fetch('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ grupos: [...gruposSelecionados] }) });
+}
+
+async function atualizarGrupos(btn) {
+  btn.disabled = true; btn.textContent = 'Atualizando...';
+  try {
+    const r = await api('/api/atualizar-grupos', {});
+    if (!r.ok) throw new Error(r.erro);
+    const estado = await api('/api/estado');
+    renderGrupos(estado);
+  } catch (err) {
+    mostrarAviso('Erro ao atualizar grupos: ' + err.message);
+  }
+  btn.disabled = false; btn.textContent = '🔄 Atualizar lista de grupos';
+}
+
+function marcar46() {
+  for (const g of gruposCarregados) {
+    if (g.nome.includes('46')) gruposSelecionados.add(g.id);
+  }
+  aplicarSelecao();
+}
+
+function marcarCuritiba() {
+  for (const g of gruposCarregados) {
+    const n = g.nome.toUpperCase().replace(/[-\s]+/g, ' ');
+    if (n.includes('VST PR') && !n.includes('PAP') && !n.includes('SUPORTE') && !n.includes('INTERNO')) {
+      gruposSelecionados.add(g.id);
+    }
+  }
+  aplicarSelecao();
+}
+
+function aplicarSelecao() {
+  document.querySelectorAll('#gruposLista input[type=checkbox]').forEach((cb, i) => {
+    cb.checked = gruposSelecionados.has(gruposCarregados[i].id);
+  });
+  atualizarContador();
+  salvarGrupos();
+  mostrarOk('msgSalva', 'Seleção salva!');
+}
+
+function limparSelecao() {
+  gruposSelecionados.clear();
+  document.querySelectorAll('#gruposLista input[type=checkbox]').forEach((cb) => (cb.checked = false));
+  atualizarContador();
+  salvarGrupos();
+  mostrarOk('msgSalva', 'Seleção limpa e salva!');
+}
+
+async function salvarConfig() {
+  const pasta = document.getElementById('pastaArquivos').value;
+  await api('/api/config', { pastaArquivos: pasta });
+  const e = await api('/api/estado');
+  renderArquivo(e);
+  mostrarOk('msgSalva', 'Pasta salva!');
+}
+
+function abrirPasta() {
+  const pasta = document.getElementById('pastaArquivos').value;
+  window.open('http://localhost:3000/abrir-pasta?caminho=' + encodeURIComponent(pasta));
+}
+
+function renderArquivo(e) {
+  const el = document.getElementById('arquivoInfo');
+  if (e.arquivo) {
+    el.innerHTML = `📄 Arquivo que será enviado: <b>${e.arquivo.nome}</b>`;
+  } else {
+    el.innerHTML = `⚠️ Nenhum arquivo Excel encontrado em <b>${e.config.pastaArquivos}</b> — coloque o .xlsx do dia na pasta.`;
+  }
+}
+
+async function salvarMensagem() {
+  const texto = document.getElementById('mensagem').value;
+  await api('/api/config', { mensagem: texto });
+  await salvarGrupos();
+  mostrarOk('msgSalva', 'Mensagem e grupos salvos!');
+}
+
+async function salvarAjustes() {
+  await api('/api/config', {
+    delayMinSegundos: Number(document.getElementById('delayMin').value),
+    delayMaxSegundos: Number(document.getElementById('delayMax').value),
+    pausarACadaXGrupos: Number(document.getElementById('pausaCada').value),
+    pausaMinutos: Number(document.getElementById('pausaMin').value),
+  });
+  await salvarGrupos();
+  mostrarOk('msgSalva', 'Ajustes salvos!');
+}
+
+async function iniciarEnvio(modo) {
+  if (modo === 'real' && !confirm(`Confirma o envio REAL para ${gruposSelecionados.size} grupo(s)?`)) return;
+  await salvarGrupos();
+  const r = await api('/api/envio', { modo });
+  if (!r.ok) { mostrarAviso(r.erro); return; }
+  esconderAviso();
+}
+
+async function parar() {
+  await api('/api/parar', {});
+}
+
+async function salvarAgendamento(btn) {
+  const horario = document.getElementById('horario').value.trim();
+  const r = await api('/api/agendamento', { horario });
+  if (!r.ok) { mostrarAviso(r.erro); return; }
+  renderAgenda(r.config);
+}
+
+function renderAgenda(config) {
+  document.getElementById('horario').value = config.horarioEnvio || '';
+  document.getElementById('agendaEstado').textContent = config.horarioEnvio
+    ? `✅ Ativo — dispara todo dia às ${config.horarioEnvio}`
+    : '⛔ Desativado';
+}
+
+function mostrarAviso(msg) {
+  const el = document.getElementById('aviso');
+  el.textContent = '⚠️ ' + msg;
+  el.style.display = 'block';
+}
+function esconderAviso() {
+  document.getElementById('aviso').style.display = 'none';
+}
+function mostrarOk(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = '✅ ' + msg;
+  setTimeout(() => (el.textContent = ''), 3000);
+}
+
+function renderJob(job) {
+  const box = document.getElementById('progresso');
+  if (!job) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  document.getElementById('btnParar').style.display = job.ativo ? 'inline-block' : 'none';
+  document.getElementById('btnEnviar').disabled = job.ativo;
+  document.getElementById('btnTeste').disabled = job.ativo;
+
+  const tagEl = document.getElementById('progTag');
+  tagEl.innerHTML = job.modo === 'teste' ? '<span class="tag teste">SIMULAÇÃO</span>' : '<span class="tag real">ENVIO REAL</span>';
+
+  const pct = job.total ? Math.round(((job.ok + job.falha) / job.total) * 100) : 0;
+  document.getElementById('barraFill').style.width = pct + '%';
+
+  let texto = '';
+  if (job.status === 'preparando') texto = '⏳ Preparando...';
+  else if (job.status === 'pausa') texto = `☕ Pausa de ${job.resultado || '10'} min... (${job.indice}/${job.total})`;
+  else if (job.status === 'concluido') texto = job.modo === 'teste' ? '✅ Simulação concluída' : `✅ Concluído: ${job.ok}/${job.total} enviados${job.falha ? ', ' + job.falha + ' falhas' : ''}`;
+  else if (job.status === 'interrompido') texto = `⏹ Interrompido: ${job.ok}/${job.total} enviados`;
+  else if (job.status === 'erro') texto = '❌ Erro: ' + (job.resultado?.erro || '');
+  else texto = `📤 Enviando ${job.indice}/${job.total}: ${job.atual}`;
+
+  document.getElementById('progTexto').textContent = texto;
+
+  let detalhe = '';
+  if (job.modo === 'teste' && job.resultado) {
+    detalhe = `Arquivo: ${job.resultado.arquivo}\nMensagem: ${job.resultado.mensagem}\nAlvos (${job.resultado.alvos.length}):\n` +
+      job.resultado.alvos.map((a) => ' • ' + a.nome).join('\n');
+  } else if (job.resultado && job.resultado.erros && job.resultado.erros.length) {
+    detalhe = 'Falhas:\n' + job.resultado.erros.join('\n');
+  } else if (job.resultado && job.resultado.erro) {
+    detalhe = job.resultado.erro;
+  }
+  document.getElementById('progResultado').textContent = detalhe;
+}
+
+async function carregarEstado() {
+  try {
+    const e = await api('/api/estado');
+    setStatus(e);
+    if (document.getElementById('pastaArquivos').value !== e.config.pastaArquivos) {
+      document.getElementById('pastaArquivos').value = e.config.pastaArquivos;
+    }
+    if (document.getElementById('mensagem').value === '' && e.config.mensagens && e.config.mensagens[0]) {
+      document.getElementById('mensagem').value = e.config.mensagens[0];
+    }
+    if (document.getElementById('delayMin').value === '') {
+      document.getElementById('delayMin').value = e.config.delayMinSegundos;
+      document.getElementById('delayMax').value = e.config.delayMaxSegundos;
+      document.getElementById('pausaCada').value = e.config.pausarACadaXGrupos;
+      document.getElementById('pausaMin').value = e.config.pausaMinutos;
+    }
+    renderArquivo(e);
+    renderGrupos(e);
+    renderAgenda(e.config);
+    renderJob(e.job);
+    document.getElementById('logBox').textContent = (e.log || []).join('\n');
+    esconderAviso();
+  } catch (_) {
+    setStatus({ conexao: 'desconectado', ultimoErro: 'Sem resposta do servidor. Ele está aberto?' });
+  }
+}
+
+setInterval(carregarEstado, 2500);
+carregarEstado();
+</script>
+</body>
+</html>
