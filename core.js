@@ -9,6 +9,7 @@ const P = require('pino');
 const QRCode = require('qrcode');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 const MIMES = {
   '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -17,7 +18,7 @@ const MIMES = {
 };
 
 const CONFIG_PADRAO = {
-  pastaArquivos: 'C:\\Users\\Owner\\Desktop\\Disparos WhatsApp',
+  pastaArquivos: path.join(os.homedir(), 'Desktop', 'Disparos WhatsApp'),
   arquivo: '',
   grupos: [],
   mensagens: ['Bom dia! Boas vendas\nSegue estoque'],

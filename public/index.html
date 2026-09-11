@@ -3,120 +3,149 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Disparador WhatsApp — Dashboard</title>
+<title>Disparador Pro — Estoque WhatsApp</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2325D366'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle'%3E%F0%9F%93%A6%3C/text%3E%3C/svg%3E" />
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px; }
-  .container { max-width: 1100px; margin: 0 auto; }
-  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-  h1 { font-size: 22px; }
-  .status { padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; }
-  .status.conectado { background: #14532d; color: #86efac; }
-  .status.conectando, .status.qr { background: #713f12; color: #fde047; }
-  .status.desconectado { background: #7f1d1d; color: #fca5a5; }
-  .card { background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 16px; border: 1px solid #334155; }
-  .card h2 { font-size: 15px; margin-bottom: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-  .linha { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  input[type=text], input[type=number], textarea, select {
-    background: #0f172a; border: 1px solid #475569; color: #e2e8f0;
-    border-radius: 8px; padding: 10px; font-size: 14px; font-family: inherit;
+  :root {
+    --verde: #25D366; --verde-escuro: #128C7E;
+    --fundo: #0b1220; --card: #101a2b; --borda: #1f2d45;
+    --texto: #e8eef7; --cinza: #8fa3bd;
   }
-  input[type=text] { flex: 1; min-width: 250px; }
-  textarea { width: 100%; min-height: 70px; resize: vertical; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: linear-gradient(160deg, #0b1220 0%, #0e1b2f 60%, #0d2233 100%); color: var(--texto); padding: 24px 16px; min-height: 100vh; }
+  .container { max-width: 1080px; margin: 0 auto; }
+
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; padding: 18px 22px; background: var(--card); border: 1px solid var(--borda); border-radius: 16px; }
+  .marca { display: flex; align-items: center; gap: 14px; }
+  .logo { width: 46px; height: 46px; background: linear-gradient(135deg, var(--verde), var(--verde-escuro)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 18px rgba(37,211,102,.35); }
+  h1 { font-size: 21px; letter-spacing: .2px; }
+  h1 small { display: block; font-size: 12px; font-weight: 400; color: var(--cinza); margin-top: 2px; }
+  .status { padding: 9px 18px; border-radius: 24px; font-size: 13.5px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .status::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+  .status.conectado { background: rgba(37,211,102,.12); color: #7ff0a8; }
+  .status.conectando, .status.qr { background: rgba(250,204,21,.12); color: #fde047; animation: pulso 1.4s infinite; }
+  .status.desconectado { background: rgba(220,38,38,.14); color: #fca5a5; }
+  @keyframes pulso { 50% { opacity: .55; } }
+
+  .card { background: var(--card); border: 1px solid var(--borda); border-radius: 16px; padding: 20px 22px; margin-bottom: 16px; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+  .card h2 { display: flex; align-items: center; gap: 10px; font-size: 14px; margin-bottom: 14px; color: var(--cinza); text-transform: uppercase; letter-spacing: 1.2px; }
+  .passo { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, var(--verde), var(--verde-escuro)); color: #04231a; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none; }
+  .passo { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, var(--verde), var(--verde-escuro)); color: #04231a; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none; }
+
+  .linha { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  input[type=text], input[type=number], textarea {
+    background: #0a1120; border: 1px solid #2a3b58; color: var(--texto);
+    border-radius: 10px; padding: 11px 13px; font-size: 14px; font-family: inherit; outline: none; transition: border .15s;
+  }
+  input:focus, textarea:focus { border-color: var(--verde); }
+  input[type=text] { flex: 1; min-width: 240px; }
+  input[type=number] { width: 84px; }
+  textarea { width: 100%; min-height: 84px; resize: vertical; line-height: 1.5; }
   button {
-    background: #2563eb; color: white; border: none; border-radius: 8px;
-    padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+    background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; border: none; border-radius: 10px;
+    padding: 11px 20px; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform .08s, filter .15s; box-shadow: 0 2px 10px rgba(37,99,235,.3);
   }
-  button:hover { background: #1d4ed8; }
-  button.verde { background: #16a34a; }
-  button.verde:hover { background: #15803d; }
-  button.vermelho { background: #dc2626; }
-  button.vermelho:hover { background: #b91c1c; }
-  button.cinza { background: #475569; }
-  button.cinza:hover { background: #64748b; }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
-  .arquivo-info { background: #0f172a; border-radius: 8px; padding: 12px; font-size: 14px; margin: 10px 0; }
-  .arquivo-info b { color: #86efac; }
-  .grupos-lista { max-height: 320px; overflow-y: auto; border: 1px solid #475569; border-radius: 8px; padding: 8px; }
-  .grupos-lista label { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 14px; }
-  .grupos-lista label:hover { background: #334155; }
-  .contador { font-size: 13px; color: #94a3b8; margin: 8px 0; }
-  .progresso { background: #0f172a; border-radius: 8px; padding: 14px; margin-top: 12px; display: none; }
-  .barra { height: 10px; background: #334155; border-radius: 5px; overflow: hidden; margin: 8px 0; }
-  .barra > div { height: 100%; background: #16a34a; width: 0%; transition: width 0.5s; }
-  .resultado { margin-top: 12px; font-size: 14px; white-space: pre-wrap; }
-  .log-box { background: #020617; border-radius: 8px; padding: 12px; font-family: Consolas, monospace; font-size: 12px; max-height: 260px; overflow-y: auto; white-space: pre-wrap; color: #a5b4fc; }
-  .aviso { background: #7f1d1d; border-radius: 8px; padding: 10px 14px; margin-top: 8px; font-size: 13px; display: none; }
-  .qr-box { text-align: center; display: none; }
-  .qr-box img { border-radius: 12px; background: white; padding: 8px; }
-  .agenda-linha { display: flex; gap: 10px; align-items: center; }
-  .agenda-linha input[type=text] { width: 90px; min-width: 90px; flex: none; text-align: center; }
-  .ok-msg { color: #86efac; font-size: 13px; margin-left: 8px; }
-  .acoes { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
-  .tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; margin-left: 8px; }
+  button:hover { filter: brightness(1.12); } button:active { transform: scale(.97); }
+  button.verde { background: linear-gradient(135deg, #34d399, #059669); box-shadow: 0 2px 12px rgba(16,185,129,.35); }
+  button.vermelho { background: linear-gradient(135deg, #f87171, #dc2626); box-shadow: 0 2px 12px rgba(220,38,38,.35); }
+  button.cinza { background: #33455f; box-shadow: none; }
+  button:disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.4); }
+
+  .arquivo-info { background: #0a1120; border: 1px dashed #2a3b58; border-radius: 10px; padding: 13px 15px; font-size: 14px; margin: 12px 0; }
+  .arquivo-info b { color: var(--verde); }
+  .ok-msg { color: #7ff0a5; font-size: 13px; font-weight: 600; }
+
+  .busca { width: 100% !important; flex: none; margin-bottom: 10px; background: #0a1120; }
+  .grupos-lista { max-height: 300px; overflow-y: auto; border: 1px solid var(--borda); border-radius: 12px; padding: 6px; background: #0a1120; }
+  .grupos-lista::-webkit-scrollbar { width: 9px; } .grupos-lista::-webkit-scrollbar-thumb { background: #2a3b58; border-radius: 5px; }
+  .grupos-lista label { display: flex; align-items: center; gap: 11px; padding: 7px 10px; border-radius: 8px; cursor: pointer; font-size: 13.5px; }
+  .grupos-lista label:hover { background: #16233c; }
+  .grupos-lista input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--verde); cursor: pointer; }
+  .contador { font-size: 13px; color: var(--cinza); margin: 10px 0; }
+  .contador b { color: var(--verde); }
+
+  .progresso { background: #0a1120; border: 1px solid var(--borda); border-radius: 12px; padding: 15px; margin-top: 14px; display: none; }
+  .barra { height: 12px; background: #1a2740; border-radius: 7px; overflow: hidden; margin: 10px 0; }
+  .barra > div { height: 100%; background: linear-gradient(90deg, var(--verde), #a3e635); width: 0%; border-radius: 7px; transition: width .6s ease; }
+  .resultado { margin-top: 10px; font-size: 13px; white-space: pre-wrap; color: #c9d6ec; max-height: 180px; overflow-y: auto; }
+  .tag { display: inline-block; padding: 3px 12px; border-radius: 14px; font-size: 11.5px; font-weight: 700; margin-left: 8px; }
   .tag.teste { background: #713f12; color: #fde047; }
   .tag.real { background: #14532d; color: #86efac; }
+
+  .aviso { background: rgba(220,38,38,.12); border: 1px solid rgba(220,38,38,.4); border-radius: 10px; padding: 11px 15px; margin-top: 10px; font-size: 13px; display: none; }
+  .qr-box { text-align: center; display: none; padding: 10px 0 0; }
+  .qr-box img { border-radius: 14px; background: #fff; padding: 10px; box-shadow: 0 6px 24px rgba(0,0,0,.4); }
+  .agenda-linha { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .agenda-linha input[type=text] { width: 100px; min-width: 100px; flex: none; text-align: center; }
+  .log-box { background: #060b14; border: 1px solid var(--borda); border-radius: 12px; padding: 14px; font-family: Consolas, 'Cascadia Mono', monospace; font-size: 12px; max-height: 240px; overflow-y: auto; white-space: pre-wrap; color: #93b4f5; line-height: 1.6; }
+  .rodape { text-align: center; color: #4c5f7a; font-size: 12px; padding: 14px 0 6px; }
+
+  #toast { position: fixed; bottom: 24px; right: 24px; background: #052e16; color: #86efac; border: 1px solid rgba(37,211,102,.5); padding: 13px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; display: none; z-index: 99; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
 </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <h1>📲 Disparador WhatsApp — Estoque Diário</h1>
+    <div class="marca">
+      <div class="logo">📦</div>
+      <h1>Disparador Pro<small>Envio de estoque para grupos do WhatsApp</small></h1>
+    </div>
     <div id="status" class="status desconectado">Carregando...</div>
   </header>
 
   <div class="card">
-    <h2>Conexão WhatsApp</h2>
+    <h2>🟢 Conexão WhatsApp</h2>
     <div id="qrBox" class="qr-box">
-      <p style="margin-bottom:8px">Escaneie este QR Code no seu celular: <b>Aparelhos conectados &gt; Conectar aparelho</b></p>
-      <img id="qrImg" width="280" alt="QR Code" />
+      <p style="margin-bottom:10px">Escaneie com o celular: <b style="color:var(--verde)">Aparelhos conectados &gt; Conectar aparelho</b></p>
+      <img id="qrImg" width="270" alt="QR Code" />
     </div>
-    <div id="connMsg" style="font-size:14px"></div>
+    <div id="connMsg" style="font-size:14px;color:var(--cinza)"></div>
   </div>
 
   <div class="card">
-    <h2>1. Arquivo do estoque</h2>
+    <h2><span class="passo">1</span> Arquivo do estoque</h2>
     <div class="linha">
       <input type="text" id="pastaArquivos" placeholder="Pasta dos arquivos Excel" />
-      <button class="cinza" onclick="abrirPasta()">Abrir pasta</button>
+      <button class="cinza" onclick="abrirPasta()">📂 Abrir pasta</button>
       <button onclick="salvarConfig()">Salvar pasta</button>
     </div>
     <div id="arquivoInfo" class="arquivo-info">...</div>
-    <div class="linha">
+    <div class="linha" style="margin-top:12px">
       <textarea id="mensagem" placeholder="Mensagem que acompanha o arquivo"></textarea>
     </div>
     <div class="linha" style="margin-top:10px">
-      <button onclick="salvarMensagem()">Salvar mensagem</button>
+      <button onclick="salvarMensagem()">💾 Salvar mensagem</button>
       <span id="msgSalva" class="ok-msg"></span>
     </div>
   </div>
 
   <div class="card">
-    <h2>2. Grupos destinatários <span id="gruposTag" class="tag"></span></h2>
+    <h2><span class="passo">2</span> Grupos destinatários <span id="gruposTag" class="tag" style="background:#1f2d45;color:var(--cinza)"></span></h2>
     <div class="linha">
       <button onclick="atualizarGrupos(this)">🔄 Atualizar lista de grupos</button>
-      <button class="cinza" onclick="marcar46()">➕ Adicionar grupos "46"</button>
-      <button class="cinza" onclick="marcarCuritiba()">➕ Adicionar parceiros Curitiba (sem PAP)</button>
-      <button class="cinza" onclick="limparSelecao()">Limpar seleção</button>
+      <button class="verde" onclick="marcar46()">➕ Grupos "46"</button>
+      <button class="verde" onclick="marcarCuritiba()">➕ Parceiros Curitiba (sem PAP)</button>
+      <button class="cinza" onclick="limparSelecao()">🗑 Limpar seleção</button>
     </div>
     <div class="contador" id="contadorGrupos"></div>
+    <input type="text" id="buscaGrupos" placeholder="🔎 Buscar grupo..." oninput="filtrarGrupos()" style="margin-bottom:0" />
     <div class="grupos-lista" id="gruposLista">Carregando...</div>
-    <div class="linha" style="margin-top:12px; gap:6px">
-      <label style="font-size:13px;color:#94a3b8">Delay entre envios (s):</label>
-      <input type="number" id="delayMin" style="width:70px" min="1" /> a
-      <input type="number" id="delayMax" style="width:70px" min="1" />
-      <label style="font-size:13px;color:#94a3b8;margin-left:10px">Pausa extra a cada</label>
-      <input type="number" id="pausaCada" style="width:70px" min="0" /> envios de
-      <input type="number" id="pausaMin" style="width:70px" min="1" /> min
+    <div class="linha" style="margin-top:12px; gap:6px; align-items:center">
+      <span style="font-size:13px;color:var(--cinza)">Delay entre envios:</span>
+      <input type="number" id="delayMin" min="1" /> a
+      <input type="number" id="delayMax" min="1" /> s
+      <span style="font-size:13px;color:var(--cinza);margin-left:8px">Pausa extra a cada</span>
+      <input type="number" id="pausaCada" min="0" /> envios de
+      <input type="number" id="pausaMin" min="1" /> min
       <button onclick="salvarAjustes()">Salvar ajustes</button>
     </div>
   </div>
 
   <div class="card">
-    <h2>3. Envio</h2>
+    <h2><span class="passo">3</span> Envio</h2>
     <div class="acoes">
       <button class="verde" id="btnTeste" onclick="iniciarEnvio('teste')">🧪 Simular (não envia)</button>
-      <button class="vermelho" id="btnEnviar" onclick="iniciarEnvio('real')">🚀 ENVIAR AGORA</button>
+      <button class="vermelho" id="btnEnviar" onclick="iniciarEnvio('real')" style="font-size:15px;padding:12px 26px">🚀 ENVIAR AGORA</button>
       <button class="cinza" id="btnParar" onclick="parar()" style="display:none">⏹ Parar</button>
     </div>
     <div class="progresso" id="progresso">
@@ -131,21 +160,24 @@
   </div>
 
   <div class="card">
-    <h2>4. Agendamento diário</h2>
+    <h2><span class="passo">4</span> Agendamento diário</h2>
     <div class="agenda-linha">
-      <label style="font-size:14px">Enviar todos os dias às</label>
+      <label style="font-size:14px">Enviar automaticamente todos os dias às</label>
       <input type="text" id="horario" placeholder="07:30" />
-      <button onclick="salvarAgendamento(this)">Salvar</button>
-      <span id="agendaEstado" style="font-size:13px"></span>
+      <button onclick="salvarAgendamento(this)">⏰ Salvar</button>
+      <span id="agendaEstado" style="font-size:13px;color:var(--cinza)"></span>
     </div>
-    <p style="font-size:12px;color:#64748b;margin-top:8px">Deixe o PC ligado e este dashboard aberto. Deixe vazio para desativar.</p>
+    <p style="font-size:12px;color:#4c5f7a;margin-top:10px">Deixe o PC ligado e o app aberto. Deixe o campo vazio para desativar.</p>
   </div>
 
   <div class="card">
-    <h2>Histórico / Log</h2>
+    <h2>📜 Histórico / Log</h2>
     <div class="log-box" id="logBox"></div>
   </div>
+
+  <div class="rodape">Disparador Pro v1.0 — sistema de disparos com proteção anti-bloqueio</div>
 </div>
+<div id="toast"></div>
 
 <script>
 let gruposSelecionados = new Set();
@@ -162,20 +194,20 @@ async function api(url, body) {
 function setStatus(e) {
   const el = document.getElementById('status');
   el.className = 'status ' + e.conexao;
-  const nomes = { conectado: '🟢 Conectado', conectando: '🟡 Conectando...', qr: '🟡 Aguardando QR', desconectado: '🔴 Desconectado' };
+  const nomes = { conectado: 'Conectado', conectando: 'Conectando...', qr: 'Aguardando QR', desconectado: 'Desconectado' };
   el.textContent = nomes[e.conexao] || e.conexao;
 
   document.getElementById('qrBox').style.display = e.qrDataUrl ? 'block' : 'none';
   if (e.qrDataUrl) document.getElementById('qrImg').src = e.qrDataUrl;
 
-  document.getElementById('connMsg').textContent = e.ultimoErro || (e.conexao === 'conectado' ? 'Conectado com sucesso.' : '');
+  document.getElementById('connMsg').textContent = e.ultimoErro || (e.conexao === 'conectado' ? 'Conectado com sucesso ao WhatsApp.' : '');
 }
 
 function renderGrupos(e) {
   const cache = e.gruposCache;
   const container = document.getElementById('gruposLista');
   if (!cache || !cache.grupos || !cache.grupos.length) {
-    container.innerHTML = '<p style="padding:10px;font-size:13px;color:#94a3b8">Nenhuma lista carregada. Clique em "Atualizar lista de grupos" (precisa estar conectado).</p>';
+    container.innerHTML = '<p style="padding:12px;font-size:13px;color:var(--cinza)">Nenhuma lista carregada — clique em "Atualizar lista de grupos" (precisa estar conectado).</p>';
     return;
   }
   gruposCarregados = cache.grupos;
@@ -192,7 +224,7 @@ function renderGrupos(e) {
       }
     }
     container.innerHTML = cache.grupos.map((g) =>
-      `<label><input type="checkbox" ${gruposSelecionados.has(g.id) ? 'checked' : ''} onchange="toggleGrupo('${g.id}', this.checked)" /> ${g.nome}</label>`
+      `<label style="display:flex" data-nome="${g.nome.toLowerCase()}"><input type="checkbox" ${gruposSelecionados.has(g.id) ? 'checked' : ''} onchange="toggleGrupo('${g.id}', this.checked)" /> ${g.nome}</label>`
     ).join('');
   } else {
     document.querySelectorAll('#gruposLista input[type=checkbox]').forEach((cb, i) => {
@@ -205,6 +237,13 @@ function renderGrupos(e) {
   atualizarContador();
 }
 
+function filtrarGrupos() {
+  const q = document.getElementById('buscaGrupos').value.toLowerCase();
+  document.querySelectorAll('#gruposLista label').forEach((lb) => {
+    lb.style.display = lb.dataset.nome.includes(q) ? 'flex' : 'none';
+  });
+}
+
 function toggleGrupo(id, marcado) {
   if (marcado) gruposSelecionados.add(id); else gruposSelecionados.delete(id);
   atualizarContador();
@@ -212,7 +251,7 @@ function toggleGrupo(id, marcado) {
 }
 
 function atualizarContador() {
-  document.getElementById('contadorGrupos').textContent = `${gruposSelecionados.size} grupo(s) selecionado(s) para receber o estoque`;
+  document.getElementById('contadorGrupos').innerHTML = `<b>${gruposSelecionados.size}</b> grupo(s) selecionado(s) para receber o estoque`;
 }
 
 function salvarGrupos() {
@@ -226,10 +265,19 @@ async function atualizarGrupos(btn) {
     if (!r.ok) throw new Error(r.erro);
     const estado = await api('/api/estado');
     renderGrupos(estado);
+    toast(`${r.total} grupos carregados!`);
   } catch (err) {
     mostrarAviso('Erro ao atualizar grupos: ' + err.message);
   }
   btn.disabled = false; btn.textContent = '🔄 Atualizar lista de grupos';
+}
+
+function aplicarSelecao() {
+  document.querySelectorAll('#gruposLista input[type=checkbox]').forEach((cb, i) => {
+    cb.checked = gruposSelecionados.has(gruposCarregados[i].id);
+  });
+  atualizarContador();
+  salvarGrupos();
 }
 
 function marcar46() {
@@ -237,6 +285,7 @@ function marcar46() {
     if (g.nome.includes('46')) gruposSelecionados.add(g.id);
   }
   aplicarSelecao();
+  toast('Grupos "46" adicionados!');
 }
 
 function marcarCuritiba() {
@@ -247,15 +296,7 @@ function marcarCuritiba() {
     }
   }
   aplicarSelecao();
-}
-
-function aplicarSelecao() {
-  document.querySelectorAll('#gruposLista input[type=checkbox]').forEach((cb, i) => {
-    cb.checked = gruposSelecionados.has(gruposCarregados[i].id);
-  });
-  atualizarContador();
-  salvarGrupos();
-  mostrarOk('msgSalva', 'Seleção salva!');
+  toast('Parceiros Curitiba adicionados!');
 }
 
 function limparSelecao() {
@@ -263,7 +304,7 @@ function limparSelecao() {
   document.querySelectorAll('#gruposLista input[type=checkbox]').forEach((cb) => (cb.checked = false));
   atualizarContador();
   salvarGrupos();
-  mostrarOk('msgSalva', 'Seleção limpa e salva!');
+  toast('Seleção limpa!');
 }
 
 async function salvarConfig() {
@@ -271,7 +312,7 @@ async function salvarConfig() {
   await api('/api/config', { pastaArquivos: pasta });
   const e = await api('/api/estado');
   renderArquivo(e);
-  mostrarOk('msgSalva', 'Pasta salva!');
+  toast('Pasta salva!');
 }
 
 function abrirPasta() {
@@ -292,7 +333,7 @@ async function salvarMensagem() {
   const texto = document.getElementById('mensagem').value;
   await api('/api/config', { mensagem: texto });
   await salvarGrupos();
-  mostrarOk('msgSalva', 'Mensagem e grupos salvos!');
+  toast('Mensagem e grupos salvos!');
 }
 
 async function salvarAjustes() {
@@ -303,7 +344,7 @@ async function salvarAjustes() {
     pausaMinutos: Number(document.getElementById('pausaMin').value),
   });
   await salvarGrupos();
-  mostrarOk('msgSalva', 'Ajustes salvos!');
+  toast('Ajustes salvos!');
 }
 
 async function iniciarEnvio(modo) {
@@ -323,6 +364,7 @@ async function salvarAgendamento(btn) {
   const r = await api('/api/agendamento', { horario });
   if (!r.ok) { mostrarAviso(r.erro); return; }
   renderAgenda(r.config);
+  toast('Agendamento salvo!');
 }
 
 function renderAgenda(config) {
@@ -336,14 +378,17 @@ function mostrarAviso(msg) {
   const el = document.getElementById('aviso');
   el.textContent = '⚠️ ' + msg;
   el.style.display = 'block';
+  toast(msg);
 }
 function esconderAviso() {
   document.getElementById('aviso').style.display = 'none';
 }
-function mostrarOk(id, msg) {
-  const el = document.getElementById(id);
+function toast(msg) {
+  const el = document.getElementById('toast');
   el.textContent = '✅ ' + msg;
-  setTimeout(() => (el.textContent = ''), 3000);
+  el.style.display = 'block';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => (el.style.display = 'none'), 2600);
 }
 
 function renderJob(job) {
@@ -405,7 +450,7 @@ async function carregarEstado() {
     document.getElementById('logBox').textContent = (e.log || []).join('\n');
     esconderAviso();
   } catch (_) {
-    setStatus({ conexao: 'desconectado', ultimoErro: 'Sem resposta do servidor. Ele está aberto?' });
+    setStatus({ conexao: 'desconectado', ultimoErro: 'Sem resposta do servidor — o app está aberto?' });
   }
 }
 

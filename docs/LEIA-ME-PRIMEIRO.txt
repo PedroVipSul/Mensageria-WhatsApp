@@ -1,0 +1,30 @@
+LEIA-ME PRIMEIRO — Disparador Pro
+==================================
+
+O QUE É
+Ferramenta para enviar um arquivo (estoque em Excel) para vários grupos
+do WhatsApp de uma vez, com mensagem personalizada e proteção contra
+bloqueio (delays entre envios).
+
+PRIMEIRA VEZ (só uma vez)
+1. Extraia esta pasta em qualquer lugar do PC (ex: Documentos).
+2. Crie a pasta "Disparos WhatsApp" na Área de Trabalho
+   (é nela que os arquivos de estoque devem ficar).
+3. Dê dois cliques em "iniciar-oculto.vbs" — o painel abre no navegador.
+4. Na primeira vez o painel pedirá para escanear um QR Code:
+   abra o WhatsApp no celular > Aparelhos conectados > Conectar aparelho.
+5. Clique em "Atualizar lista de grupos" para carregar seus grupos.
+
+USO DIÁRIO
+1. Salve o Excel do dia na pasta "Disparos WhatsApp".
+2. Abra o painel (iniciar-oculto.vbs).
+3. Confira o arquivo e a mensagem na tela.
+4. Marque os grupos destinatários.
+5. Clique em "Simular" para conferir (não envia).
+6. Clique em "ENVIAR AGORA" e acompanhe a barra de progresso.
+
+OBSERVAÇÕES
+- O envio usa o WhatsApp do número escaneado no QR (é do seu celular).
+- Deixe o painel/servidor rodando durante o uso.
+- "Parar Dashboard" encerra o sistema; "iniciar-oculto.vbs" religa.
+- O agendamento diário só funciona com o PC ligado no horário definido.
