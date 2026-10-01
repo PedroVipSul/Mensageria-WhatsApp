@@ -15,6 +15,7 @@ const MIMES = {
   '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   '.xlsm': 'application/vnd.ms-excel.sheet.macroEnabled.12',
   '.xls': 'application/vnd.ms-excel',
+  '.pdf': 'application/pdf',
 };
 
 const CONFIG_PADRAO = {
@@ -77,7 +78,7 @@ function selecionarArquivo(config) {
   if (!pasta || !fs.existsSync(pasta)) return null;
   const arquivos = fs
     .readdirSync(pasta)
-    .filter((f) => /\.(xlsx|xlsm|xls)$/i.test(f))
+    .filter((f) => /\.(xlsx|xlsm|xls|pdf)$/i.test(f))
     .map((f) => {
       const caminho = path.join(pasta, f);
       return { caminho, mtime: fs.statSync(caminho).mtime.getTime() };

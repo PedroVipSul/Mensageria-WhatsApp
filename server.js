@@ -109,8 +109,9 @@ app.get('/api/estado', (req, res) => {
 
 app.post('/api/config', (req, res) => {
   const config = core.carregarConfig(DIR);
-  const { pastaArquivos, mensagem, grupos, delayMinSegundos, delayMaxSegundos, pausarACadaXGrupos, pausaMinutos } = req.body || {};
+  const { pastaArquivos, mensagem, grupos, delayMinSegundos, delayMaxSegundos, pausarACadaXGrupos, pausaMinutos, arquivo } = req.body || {};
   if (typeof pastaArquivos === 'string' && pastaArquivos.trim() !== '') config.pastaArquivos = pastaArquivos.trim();
+  if (typeof arquivo === 'string') config.arquivo = arquivo.trim();
   if (typeof mensagem === 'string') config.mensagens = mensagem.split('\n---\n').filter((m) => m.trim() !== '');
   if (Array.isArray(grupos)) config.grupos = grupos.map(String);
   if (Number.isFinite(delayMinSegundos)) config.delayMinSegundos = Math.max(1, delayMinSegundos);

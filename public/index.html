@@ -110,6 +110,11 @@
       <button onclick="salvarConfig()">Salvar pasta</button>
     </div>
     <div id="arquivoInfo" class="arquivo-info">...</div>
+    <div class="linha" style="margin-top:10px">
+      <input type="text" id="arquivoEspecifico" placeholder="📄 Arquivo específico (ex: PDF) — opcional, deixa vazio para pegar o mais recente" style="font-size:13px" />
+      <button class="cinza" onclick="salvarArquivoEspecifico(this)">Definir</button>
+      <button class="cinza" onclick="limparArquivoEspecifico(this)">Voltar p/ automático</button>
+    </div>
     <div class="linha" style="margin-top:12px">
       <textarea id="mensagem" placeholder="Mensagem que acompanha o arquivo"></textarea>
     </div>
@@ -325,11 +330,34 @@ function abrirPasta() {
 
 function renderArquivo(e) {
   const el = document.getElementById('arquivoInfo');
+  const campo = document.getElementById('arquivoEspecifico');
+  campo.value = e.config.arquivo || '';
   if (e.arquivo) {
-    el.innerHTML = `📄 Arquivo que será enviado: <b>${e.arquivo.nome}</b>`;
+    const automatico = !(e.config.arquivo && e.config.arquivo.trim() !== '');
+    el.innerHTML = `📄 Arquivo que será enviado: <b>${e.arquivo.nome}</b>` +
+      (automatico ? ' <span class="tag" style="background:#14532d;color:#86efac">AUTO</span>' : ' <span class="tag teste">ESPECÍFICO</span>');
   } else {
-    el.innerHTML = `⚠️ Nenhum arquivo Excel encontrado em <b>${e.config.pastaArquivos}</b> — coloque o .xlsx do dia na pasta.`;
+    el.innerHTML = `⚠️ Nenhum arquivo (Excel/PDF) encontrado em <b>${e.config.pastaArquivos}</b> — coloque o arquivo do dia na pasta.`;
   }
+}
+
+async function salvarArquivoEspecifico(btn) {
+  const valor = document.getElementById('arquivoEspecifico').value;
+  if (valor.trim() !== '' && !/^(xlsx|xlsm|xls|pdf)$/i.test(valor.split('.').pop())) {
+    mostrarAviso('Formato não suportado — use .xlsx, .xls ou .pdf');
+    return;
+  }
+  await api('/api/config', { arquivo: valor });
+  const e = await api('/api/estado');
+  renderArquivo(e);
+  toast('Arquivo definido!');
+}
+
+async function limparArquivoEspecifico(btn) {
+  await api('/api/config', { arquivo: '' });
+  const e = await api('/api/estado');
+  renderArquivo(e);
+  toast('De volta ao automático!');
 }
 
 async function salvarMensagem() {
