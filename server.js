@@ -227,6 +227,14 @@ app.post('/api/parar', (req, res) => {
   res.json({ ok: false, msg: 'Nenhum envio em andamento.' });
 });
 
+app.post('/api/job-limpar', (req, res) => {
+  if (job && job.ativo) {
+    return res.status(409).json({ ok: false, erro: 'Ha um envio em andamento.' });
+  }
+  job = null;
+  res.json({ ok: true });
+});
+
 app.get('/abrir-pasta', (req, res) => {
   const caminho = String(req.query.caminho || '');
   if (!caminho || !fs.existsSync(caminho)) {

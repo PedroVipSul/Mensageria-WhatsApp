@@ -155,6 +155,9 @@
       </div>
       <div class="barra"><div id="barraFill"></div></div>
       <div class="resultado" id="progResultado"></div>
+      <div class="linha" style="justify-content:flex-end;margin-top:8px">
+        <button class="cinza" id="btnFecharJob" onclick="limparJob()" style="display:none;padding:7px 14px;font-size:12px">✕ Fechar</button>
+      </div>
     </div>
     <div class="aviso" id="aviso"></div>
   </div>
@@ -359,6 +362,11 @@ async function parar() {
   await api('/api/parar', {});
 }
 
+async function limparJob() {
+  await api('/api/job-limpar', {});
+  await carregarEstado();
+}
+
 async function salvarAgendamento(btn) {
   const horario = document.getElementById('horario').value.trim();
   const r = await api('/api/agendamento', { horario });
@@ -396,6 +404,7 @@ function renderJob(job) {
   if (!job) { box.style.display = 'none'; return; }
   box.style.display = 'block';
   document.getElementById('btnParar').style.display = job.ativo ? 'inline-block' : 'none';
+  document.getElementById('btnFecharJob').style.display = job.ativo ? 'none' : 'inline-block';
   document.getElementById('btnEnviar').disabled = job.ativo;
   document.getElementById('btnTeste').disabled = job.ativo;
 
