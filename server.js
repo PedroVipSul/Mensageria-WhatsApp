@@ -97,10 +97,12 @@ function arquivoSelecionado() {
 app.get('/api/estado', (req, res) => {
   const config = core.carregarConfig(DIR);
   const cache = core.lerCacheGrupos(DIR);
+  const lista = core.prepararArquivos(config);
   res.json({
     ...estado,
     config,
-    arquivo: arquivoSelecionado(),
+    arquivo: lista ? { caminho: lista[0].caminho, nome: lista[0].nome } : null,
+    arquivosExtras: lista ? lista.slice(1).map((a) => ({ caminho: a.caminho, nome: a.nome })) : [],
     gruposCache: cache,
     job: job && job.ativo ? { ...job, erros: job.erros.slice(-10) } : job && !job.ativo ? job : null,
     log: core.lerLog(DIR, 80),
@@ -109,9 +111,10 @@ app.get('/api/estado', (req, res) => {
 
 app.post('/api/config', (req, res) => {
   const config = core.carregarConfig(DIR);
-  const { pastaArquivos, mensagem, grupos, delayMinSegundos, delayMaxSegundos, pausarACadaXGrupos, pausaMinutos, arquivo } = req.body || {};
+  const { pastaArquivos, mensagem, grupos, delayMinSegundos, delayMaxSegundos, pausarACadaXGrupos, pausaMinutos, arquivo, arquivosExtras } = req.body || {};
   if (typeof pastaArquivos === 'string' && pastaArquivos.trim() !== '') config.pastaArquivos = pastaArquivos.trim();
   if (typeof arquivo === 'string') config.arquivo = arquivo.trim();
+  if (Array.isArray(arquivosExtras)) config.arquivosExtras = arquivosExtras.map(String).filter((a) => a.trim() !== '');
   if (typeof mensagem === 'string') config.mensagens = mensagem.split('\n---\n').filter((m) => m.trim() !== '');
   if (Array.isArray(grupos)) config.grupos = grupos.map(String);
   if (Number.isFinite(delayMinSegundos)) config.delayMinSegundos = Math.max(1, delayMinSegundos);
@@ -137,9 +140,9 @@ app.post('/api/envio', async (req, res) => {
   }
   const modo = req.body?.modo === 'teste' ? 'teste' : 'real';
   const config = core.carregarConfig(DIR);
-  const arquivo = arquivoSelecionado();
-  if (!arquivo) {
-    return res.status(400).json({ ok: false, erro: 'Nenhum arquivo Excel encontrado na pasta configurada.' });
+  const listaArquivos = core.prepararArquivos(config);
+  if (!listaArquivos || listaArquivos.length === 0) {
+    return res.status(400).json({ ok: false, erro: 'Nenhum arquivo (Excel/PDF) encontrado na pasta configurada.' });
   }
   if ((config.grupos || []).length === 0) {
     return res.status(400).json({ ok: false, erro: 'Nenhum grupo selecionado.' });
@@ -173,12 +176,13 @@ app.post('/api/envio', async (req, res) => {
       job.fim = new Date().toISOString();
       job.resultado = {
         modo,
-        arquivo: arquivo.nome,
+        arquivo: listaArquivos[0].nome,
+        arquivos: listaArquivos.map((a) => a.nome),
         mensagem: config.mensagens[0],
         alvos,
         mensagemNaoEnviada: true,
       };
-      core.log(`[TESTE] Simulacao concluida: ${alvos.length} grupo(s), arquivo ${arquivo.nome}. Nenhum envio.`, DIR);
+      core.log(`[TESTE] Simulacao concluida: ${alvos.length} grupo(s), arquivo(s) ${listaArquivos.map((a) => a.nome).join(' + ')}. Nenhum envio.`, DIR);
       return;
     }
 
@@ -193,7 +197,7 @@ app.post('/api/envio', async (req, res) => {
       return;
     }
     job.total = alvos.length;
-    const resumo = await core.enviarArquivo(DIR, s, config, alvos, arquivo.caminho, {
+    const resumo = await core.enviarArquivo(DIR, s, config, alvos, listaArquivos, {
       onProgress: (p) => {
         job.indice = p.indice;
         job.total = p.total;

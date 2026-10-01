@@ -152,13 +152,22 @@ function resolverAlvos(config, grupos) {
   return alvos;
 }
 
-async function enviarArquivo(dir, sock, config, alvos, caminhoArquivo, opcoes = {}) {
-  const { onProgress = () => {}, abortCheck = () => false } = opcoes;
-  const nomeArquivo = path.basename(caminhoArquivo);
-  const mime = MIMES[path.extname(nomeArquivo).toLowerCase()] || 'application/octet-stream';
-  const buffer = fs.readFileSync(caminhoArquivo);
+function prepararArquivos(config) {
+  const principal = selecionarArquivo(config);
+  if (!principal || !fs.existsSync(principal)) return null;
+  const caminhos = [principal, ...(config.arquivosExtras || [])].filter((p) => p && fs.existsSync(p));
+  return caminhos.map((c) => ({
+    caminho: c,
+    nome: path.basename(c),
+    mime: MIMES[path.extname(c).toLowerCase()] || 'application/octet-stream',
+  }));
+}
 
-  log(`Arquivo selecionado: ${nomeArquivo}`, dir);
+async function enviarArquivo(dir, sock, config, alvos, listaArquivos, opcoes = {}) {
+  const { onProgress = () => {}, abortCheck = () => false } = opcoes;
+  const buffers = listaArquivos.map((a) => ({ ...a, buffer: fs.readFileSync(a.caminho) }));
+
+  log(`Arquivo(s) para envio: ${listaArquivos.map((a) => a.nome).join(' + ')}`, dir);
   log(`Iniciando envio para ${alvos.length} grupo(s)...`, dir);
 
   let enviados = 0;
@@ -176,21 +185,32 @@ async function enviarArquivo(dir, sock, config, alvos, caminhoArquivo, opcoes = 
     onProgress({ indice, total: alvos.length, atual: chat.nome, status: 'enviando' });
 
     const texto = (config.mensagens[Math.floor(Math.random() * config.mensagens.length)] || '').trim();
-    try {
-      await sock.sendMessage(chat.id, {
-        document: buffer,
-        mimetype: mime,
-        fileName: nomeArquivo,
-        caption: texto,
-      });
-      enviados++;
-      log(`[${indice}/${alvos.length}] OK -> ${chat.nome}`, dir);
-      onProgress({ indice, total: alvos.length, atual: chat.nome, status: 'ok' });
-    } catch (erro) {
+    let falhou = false;
+    let msgErro = '';
+    for (let i = 0; i < buffers.length; i++) {
+      try {
+        const payload = { document: buffers[i].buffer, mimetype: buffers[i].mime, fileName: buffers[i].nome };
+        if (i === 0 && texto) payload.caption = texto;
+        await sock.sendMessage(chat.id, payload);
+        log(`[${indice}/${alvos.length}] OK -> ${chat.nome} (${buffers[i].nome})`, dir);
+      } catch (erro) {
+        falhou = true;
+        msgErro = `${buffers[i].nome}: ${erro.message}`;
+        break;
+      }
+      if (i < buffers.length - 1) {
+        await sleep((config.intervaloAnexosSegundos ?? 10) * 1000);
+      }
+    }
+
+    if (falhou) {
       falhas++;
-      erros.push(`${chat.nome}: ${erro.message}`);
-      log(`[${indice}/${alvos.length}] FALHOU -> ${chat.nome}: ${erro.message}`, dir);
-      onProgress({ indice, total: alvos.length, atual: chat.nome, status: 'falha', erro: erro.message });
+      erros.push(`${chat.nome}: ${msgErro}`);
+      log(`[${indice}/${alvos.length}] FALHOU -> ${chat.nome}: ${msgErro}`, dir);
+      onProgress({ indice, total: alvos.length, atual: chat.nome, status: 'falha', erro: msgErro });
+    } else {
+      enviados++;
+      onProgress({ indice, total: alvos.length, atual: chat.nome, status: 'ok' });
     }
 
     if (indice < alvos.length && !abortCheck()) {
@@ -232,6 +252,7 @@ module.exports = {
   lerLog,
   delayAleatorio,
   selecionarArquivo,
+  prepararArquivos,
   criarSocket,
   listarGrupos,
   salvarCacheGrupos,

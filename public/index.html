@@ -115,6 +115,11 @@
       <button class="cinza" onclick="salvarArquivoEspecifico(this)">Definir</button>
       <button class="cinza" onclick="limparArquivoEspecifico(this)">Voltar p/ automático</button>
     </div>
+    <div class="linha" style="margin-top:10px">
+      <input type="text" id="extraCaminho" placeholder="➕ Anexar outro arquivo junto (PDF/Excel) — cole o caminho completo do arquivo" style="font-size:13px" />
+      <button class="verde" onclick="adicionarExtra(this)">➕ Anexar junto</button>
+    </div>
+    <div id="extrasLista" style="margin-top:8px"></div>
     <div class="linha" style="margin-top:12px">
       <textarea id="mensagem" placeholder="Mensagem que acompanha o arquivo"></textarea>
     </div>
@@ -360,6 +365,44 @@ async function limparArquivoEspecifico(btn) {
   toast('De volta ao automático!');
 }
 
+function renderExtras(e) {
+  const el = document.getElementById('extrasLista');
+  const extras = e.arquivosExtras || [];
+  el.innerHTML = extras.map((a, i) =>
+    `<div style="display:flex;align-items:center;gap:8px;background:#0a1120;border:1px solid #2a3b58;border-radius:8px;padding:7px 10px;margin-bottom:4px;font-size:13px"><span>📎</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.nome}</span><button class="cinza" style="padding:4px 10px;font-size:11px;flex:none" onclick="removerExtra(${i})">✕</button></div>`
+  ).join('');
+}
+
+async function adicionarExtra(btn) {
+  const v = document.getElementById('extraCaminho').value.trim();
+  if (v === '') { mostrarAviso('Cole o caminho completo do arquivo.'); return; }
+  const ext = v.split('.').pop().toLowerCase();
+  if (!['xlsx', 'xlsm', 'xls', 'pdf'].includes(ext)) {
+    mostrarAviso('Formato não suportado — use .xlsx, .xls ou .pdf');
+    return;
+  }
+  const e = await api('/api/estado');
+  const extras = (e.arquivosExtras || []).map((a) => a.caminho);
+  extras.push(v);
+  await api('/api/config', { arquivosExtras: extras });
+  document.getElementById('extraCaminho').value = '';
+  const e2 = await api('/api/estado');
+  renderExtras(e2);
+  renderArquivo(e2);
+  toast('Anexo adicionado!');
+}
+
+async function removerExtra(i) {
+  const e = await api('/api/estado');
+  const extras = (e.arquivosExtras || []).map((a) => a.caminho);
+  extras.splice(i, 1);
+  await api('/api/config', { arquivosExtras: extras });
+  const e2 = await api('/api/estado');
+  renderExtras(e2);
+  renderArquivo(e2);
+  toast('Anexo removido!');
+}
+
 async function salvarMensagem() {
   const texto = document.getElementById('mensagem').value;
   await api('/api/config', { mensagem: texto });
@@ -454,7 +497,8 @@ function renderJob(job) {
 
   let detalhe = '';
   if (job.modo === 'teste' && job.resultado) {
-    detalhe = `Arquivo: ${job.resultado.arquivo}\nMensagem: ${job.resultado.mensagem}\nAlvos (${job.resultado.alvos.length}):\n` +
+    const nomes = job.resultado.arquivos || [job.resultado.arquivo];
+    detalhe = `Arquivos: ${nomes.join(' + ')}\nMensagem: ${job.resultado.mensagem}\nAlvos (${job.resultado.alvos.length}):\n` +
       job.resultado.alvos.map((a) => ' • ' + a.nome).join('\n');
   } else if (job.resultado && job.resultado.erros && job.resultado.erros.length) {
     detalhe = 'Falhas:\n' + job.resultado.erros.join('\n');
@@ -481,6 +525,7 @@ async function carregarEstado() {
       document.getElementById('pausaMin').value = e.config.pausaMinutos;
     }
     renderArquivo(e);
+    renderExtras(e);
     renderGrupos(e);
     renderAgenda(e.config);
     renderJob(e.job);
