@@ -1,11 +1,31 @@
 const express = require('express');
 const fs = require('fs');
+const net = require('net');
 const path = require('path');
 const QRCode = require('qrcode');
 const core = require('./core');
 
 const DIR = __dirname;
 const PORTA = 3000;
+
+process.on('uncaughtException', (erro) => {
+  try { core.log('CRASH capturado: ' + (erro && (erro.stack || erro.message)), DIR); } catch (_) {}
+});
+process.on('unhandledRejection', (erro) => {
+  try { core.log('REJEICAO capturada: ' + (erro && (erro.stack || erro.message)), DIR); } catch (_) {}
+});
+
+(function verificarInstanciaUnica() {
+  const teste = net.connect(PORTA, '127.0.0.1');
+  teste.setTimeout(2000);
+  teste.on('connect', () => {
+    teste.destroy();
+    console.log('Ja existe um servidor do Disparador Pro no ar. Esta instancia sera encerrada.');
+    process.exit(0);
+  });
+  teste.on('timeout', () => { teste.destroy(); });
+  teste.on('error', () => {});
+})();
 
 const app = express();
 app.use(express.json());
@@ -311,4 +331,10 @@ conectar().catch(() => {});
 app.listen(PORTA, '127.0.0.1', () => {
   console.log(`\n=== DASHBOARD DISPONIVEL: http://localhost:${PORTA} ===\n`);
   console.log('(deixe esta janela aberta enquanto usa o disparador)\n');
+}).on('error', (erro) => {
+  if (erro.code === 'EADDRINUSE') {
+    console.log('Porta 3000 ja em uso — outra instancia esta no ar. Encerrando esta.');
+    process.exit(0);
+  }
+  throw erro;
 });
