@@ -163,7 +163,7 @@ function prepararArquivos(config) {
   }));
 }
 
-async function enviarArquivo(dir, sock, config, alvos, listaArquivos, opcoes = {}) {
+async function enviarArquivo(dir, getSock, config, alvos, listaArquivos, opcoes = {}) {
   const { onProgress = () => {}, abortCheck = () => false } = opcoes;
   const buffers = listaArquivos.map((a) => ({ ...a, buffer: fs.readFileSync(a.caminho) }));
 
@@ -188,6 +188,12 @@ async function enviarArquivo(dir, sock, config, alvos, listaArquivos, opcoes = {
     let falhou = false;
     let msgErro = '';
     for (let i = 0; i < buffers.length; i++) {
+      const sock = typeof getSock === 'function' ? getSock() : getSock;
+      if (!sock) {
+        falhou = true;
+        msgErro = `${buffers[i].nome}: sem conexao`;
+        break;
+      }
       try {
         const payload = { document: buffers[i].buffer, mimetype: buffers[i].mime, fileName: buffers[i].nome };
         if (i === 0 && texto) payload.caption = texto;

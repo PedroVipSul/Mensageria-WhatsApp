@@ -12,22 +12,36 @@ app.use(express.json());
 app.use(express.static(path.join(DIR, 'public')));
 
 let sock = null;
+let sockAtual = null;
+let reconexaoAgendada = false;
 let estado = { conexao: 'desconectado', ultimoErro: null, qrDataUrl: null };
 let conectando = false;
 let job = null;
 let ultimoDiaAgendado = null;
+
+function agendarReconexao() {
+  if (reconexaoAgendada) return;
+  reconexaoAgendada = true;
+  setTimeout(() => {
+    reconexaoAgendada = false;
+    conectar().catch(() => {});
+  }, 10000);
+}
 
 function setEstado(parcial) {
   estado = { ...estado, ...parcial };
 }
 
 async function conectar() {
-  if (estado.conexao === 'conectado') return sock;
+  if (estado.conexao === 'conectado' && sockAtual) return sockAtual;
   if (conectando) return null;
   conectando = true;
   setEstado({ conexao: 'conectando', qrDataUrl: null, ultimoErro: null });
 
   try {
+    if (sock) {
+      try { sock.end(new Error('substituido')); } catch (_) {}
+    }
     sock = await core.criarSocket(DIR);
 
     sock.ev.on('connection.update', async ({ connection, qr, lastDisconnect }) => {
@@ -38,21 +52,22 @@ async function conectar() {
         } catch (_) {}
       }
       if (connection === 'open') {
+        sockAtual = sock;
         setEstado({ conexao: 'conectado', qrDataUrl: null });
         conectando = false;
         core.log('WhatsApp conectado!', DIR);
       }
       if (connection === 'close') {
+        if (sockAtual === sock) sockAtual = null;
         conectando = false;
         const codigo = lastDisconnect?.error?.output?.statusCode;
-        sock = null;
         if (codigo === core.DisconnectReason.loggedOut) {
           setEstado({ conexao: 'desconectado', ultimoErro: 'Sessao deslogada. Apague a pasta "sessao-baileys" e reinicie.' });
           core.log('Sessao deslogada do WhatsApp.', DIR);
         } else {
           setEstado({ conexao: 'desconectado', ultimoErro: 'Conexao caiu (codigo ' + codigo + '). Reconectando em 10s...' });
           core.log('Conexao caiu (codigo ' + codigo + '). Reconectando...', DIR);
-          setTimeout(() => conectar().catch(() => {}), 10000);
+          agendarReconexao();
         }
       }
     });
@@ -75,7 +90,7 @@ async function conectar() {
 async function aguardarConectado(timeoutMs = 180000) {
   const fim = Date.now() + timeoutMs;
   while (Date.now() < fim) {
-    if (estado.conexao === 'conectado' && sock) return sock;
+    if (estado.conexao === 'conectado' && sockAtual) return sockAtual;
     await core.sleep(1000);
   }
   throw new Error('tempo esgotado aguardando conexao do WhatsApp');
@@ -197,7 +212,7 @@ app.post('/api/envio', async (req, res) => {
       return;
     }
     job.total = alvos.length;
-    const resumo = await core.enviarArquivo(DIR, s, config, alvos, listaArquivos, {
+    const resumo = await core.enviarArquivo(DIR, () => sockAtual, config, alvos, listaArquivos, {
       onProgress: (p) => {
         job.indice = p.indice;
         job.total = p.total;

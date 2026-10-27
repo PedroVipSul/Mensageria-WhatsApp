@@ -65,7 +65,7 @@ async function principal() {
       return;
     }
 
-    const resumo = await core.enviarArquivo(DIR, sock, config, alvos, caminhoArquivo, {
+    const resumo = await core.enviarArquivo(DIR, () => sock, config, alvos, core.prepararArquivos(config), {
       onProgress: (p) => {
         if (p.status === 'pausa') console.log(`>>> Pausa de ${p.pausaMinutos} min...`);
       },
