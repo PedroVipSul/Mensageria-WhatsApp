@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Disparador Pro â€” Estoque WhatsApp</title>
+<title>Disparador Pro — Estoque WhatsApp</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2325D366'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle'%3E%F0%9F%93%A6%3C/text%3E%3C/svg%3E" />
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -87,14 +87,14 @@
 <div class="container">
   <header>
     <div class="marca">
-      <div class="logo">ðŸ“¦</div>
+      <div class="logo">📦</div>
       <h1>Disparador Pro<small>Envio de estoque para grupos do WhatsApp</small></h1>
     </div>
     <div id="status" class="status desconectado">Carregando...</div>
   </header>
 
   <div class="card">
-    <h2>ðŸŸ¢ ConexÃ£o WhatsApp</h2>
+    <h2>🟢 Conexão WhatsApp</h2>
     <div id="qrBox" class="qr-box">
       <p style="margin-bottom:10px">Escaneie com o celular: <b style="color:var(--verde)">Aparelhos conectados &gt; Conectar aparelho</b></p>
       <img id="qrImg" width="270" alt="QR Code" />
@@ -106,39 +106,39 @@
     <h2><span class="passo">1</span> Arquivo do estoque</h2>
     <div class="linha">
       <input type="text" id="pastaArquivos" placeholder="Pasta dos arquivos Excel" />
-      <button class="cinza" onclick="abrirPasta()">ðŸ“‚ Abrir pasta</button>
+      <button class="cinza" onclick="abrirPasta()">📂 Abrir pasta</button>
       <button onclick="salvarConfig()">Salvar pasta</button>
     </div>
     <div id="arquivoInfo" class="arquivo-info">...</div>
     <div class="linha" style="margin-top:10px">
-      <input type="text" id="arquivoEspecifico" placeholder="ðŸ“„ Arquivo especÃ­fico (ex: PDF) â€” opcional, deixa vazio para pegar o mais recente" style="font-size:13px" />
+      <input type="text" id="arquivoEspecifico" placeholder="📄 Arquivo específico (PDF, Excel ou imagem) — opcional, deixa vazio para pegar o mais recente" style="font-size:13px" />
       <button class="cinza" onclick="salvarArquivoEspecifico(this)">Definir</button>
-      <button class="cinza" onclick="limparArquivoEspecifico(this)">Voltar p/ automÃ¡tico</button>
+      <button class="cinza" onclick="limparArquivoEspecifico(this)">Voltar p/ automático</button>
     </div>
     <div class="linha" style="margin-top:10px">
-      <input type="text" id="extraCaminho" placeholder="âž• Anexar outro arquivo junto (PDF/Excel) â€” cole o caminho completo do arquivo" style="font-size:13px" />
-      <button class="verde" onclick="adicionarExtra(this)">âž• Anexar junto</button>
+      <input type="text" id="extraCaminho" placeholder="➕ Anexar outro arquivo junto (PDF, Excel ou imagem) — cole o caminho completo do arquivo" style="font-size:13px" />
+      <button class="verde" onclick="adicionarExtra(this)">➕ Anexar junto</button>
     </div>
     <div id="extrasLista" style="margin-top:8px"></div>
     <div class="linha" style="margin-top:12px">
       <textarea id="mensagem" placeholder="Mensagem que acompanha o arquivo"></textarea>
     </div>
     <div class="linha" style="margin-top:10px">
-      <button onclick="salvarMensagem()">ðŸ’¾ Salvar mensagem</button>
+      <button onclick="salvarMensagem()">💾 Salvar mensagem</button>
       <span id="msgSalva" class="ok-msg"></span>
     </div>
   </div>
 
   <div class="card">
-    <h2><span class="passo">2</span> Grupos destinatÃ¡rios <span id="gruposTag" class="tag" style="background:#1f2d45;color:var(--cinza)"></span></h2>
+    <h2><span class="passo">2</span> Grupos destinatários <span id="gruposTag" class="tag" style="background:#1f2d45;color:var(--cinza)"></span></h2>
     <div class="linha">
-      <button onclick="atualizarGrupos(this)">ðŸ”„ Atualizar lista de grupos</button>
-      <button class="verde" onclick="marcar46()">âž• Grupos "46"</button>
-      <button class="verde" onclick="marcarCuritiba()">âž• Parceiros Curitiba (sem PAP)</button>
-      <button class="cinza" onclick="limparSelecao()">ðŸ—‘ Limpar seleÃ§Ã£o</button>
+      <button onclick="atualizarGrupos(this)">🔄 Atualizar lista de grupos</button>
+      <button class="verde" onclick="marcar46()">➕ Grupos "46"</button>
+      <button class="verde" onclick="marcarCuritiba()">➕ Parceiros Curitiba (sem PAP)</button>
+      <button class="cinza" onclick="limparSelecao()">🗑 Limpar seleção</button>
     </div>
     <div class="contador" id="contadorGrupos"></div>
-    <input type="text" id="buscaGrupos" placeholder="ðŸ”Ž Buscar grupo..." oninput="filtrarGrupos()" style="margin-bottom:0" />
+    <input type="text" id="buscaGrupos" placeholder="🔎 Buscar grupo..." oninput="filtrarGrupos()" style="margin-bottom:0" />
     <div class="grupos-lista" id="gruposLista">Carregando...</div>
     <div class="linha" style="margin-top:12px; gap:6px; align-items:center">
       <span style="font-size:13px;color:var(--cinza)">Delay entre envios:</span>
@@ -154,9 +154,9 @@
   <div class="card">
     <h2><span class="passo">3</span> Envio</h2>
     <div class="acoes">
-      <button class="verde" id="btnTeste" onclick="iniciarEnvio('teste')">ðŸ§ª Simular (nÃ£o envia)</button>
-      <button class="vermelho" id="btnEnviar" onclick="iniciarEnvio('real')" style="font-size:15px;padding:12px 26px">ðŸš€ ENVIAR AGORA</button>
-      <button class="cinza" id="btnParar" onclick="parar()" style="display:none">â¹ Parar</button>
+      <button class="verde" id="btnTeste" onclick="iniciarEnvio('teste')">🧪 Simular (não envia)</button>
+      <button class="vermelho" id="btnEnviar" onclick="iniciarEnvio('real')" style="font-size:15px;padding:12px 26px">🚀 ENVIAR AGORA</button>
+      <button class="cinza" id="btnParar" onclick="parar()" style="display:none">⏹ Parar</button>
     </div>
     <div class="progresso" id="progresso">
       <div class="linha" style="justify-content:space-between">
@@ -166,29 +166,29 @@
       <div class="barra"><div id="barraFill"></div></div>
       <div class="resultado" id="progResultado"></div>
       <div class="linha" style="justify-content:flex-end;margin-top:8px">
-        <button class="cinza" id="btnFecharJob" onclick="limparJob()" style="display:none;padding:7px 14px;font-size:12px">âœ• Fechar</button>
+        <button class="cinza" id="btnFecharJob" onclick="limparJob()" style="display:none;padding:7px 14px;font-size:12px">✕ Fechar</button>
       </div>
     </div>
     <div class="aviso" id="aviso"></div>
   </div>
 
   <div class="card">
-    <h2><span class="passo">4</span> Agendamento diÃ¡rio</h2>
+    <h2><span class="passo">4</span> Agendamento diário</h2>
     <div class="agenda-linha">
-      <label style="font-size:14px">Enviar automaticamente todos os dias Ã s</label>
+      <label style="font-size:14px">Enviar automaticamente todos os dias às</label>
       <input type="text" id="horario" placeholder="07:30" />
-      <button onclick="salvarAgendamento(this)">â° Salvar</button>
+      <button onclick="salvarAgendamento(this)">⏰ Salvar</button>
       <span id="agendaEstado" style="font-size:13px;color:var(--cinza)"></span>
     </div>
     <p style="font-size:12px;color:#4c5f7a;margin-top:10px">Deixe o PC ligado e o app aberto. Deixe o campo vazio para desativar.</p>
   </div>
 
   <div class="card">
-    <h2>ðŸ“œ HistÃ³rico / Log</h2>
+    <h2>📜 Histórico / Log</h2>
     <div class="log-box" id="logBox"></div>
   </div>
 
-  <div class="rodape">Disparador Pro v1.0 â€” sistema de disparos com proteÃ§Ã£o anti-bloqueio</div>
+  <div class="rodape">Disparador Pro v1.0 — sistema de disparos com proteção anti-bloqueio</div>
 </div>
 <div id="toast"></div>
 
@@ -220,7 +220,7 @@ function renderGrupos(e) {
   const cache = e.gruposCache;
   const container = document.getElementById('gruposLista');
   if (!cache || !cache.grupos || !cache.grupos.length) {
-    container.innerHTML = '<p style="padding:12px;font-size:13px;color:var(--cinza)">Nenhuma lista carregada â€” clique em "Atualizar lista de grupos" (precisa estar conectado).</p>';
+    container.innerHTML = '<p style="padding:12px;font-size:13px;color:var(--cinza)">Nenhuma lista carregada — clique em "Atualizar lista de grupos" (precisa estar conectado).</p>';
     return;
   }
   gruposCarregados = cache.grupos;
@@ -246,7 +246,7 @@ function renderGrupos(e) {
   }
 
   const dt = new Date(cache.atualizadoEm);
-  document.getElementById('gruposTag').textContent = `${cache.grupos.length} grupos â€” lista de ${dt.toLocaleDateString('pt-BR')}`;
+  document.getElementById('gruposTag').textContent = `${cache.grupos.length} grupos — lista de ${dt.toLocaleDateString('pt-BR')}`;
   atualizarContador();
 }
 
@@ -282,7 +282,7 @@ async function atualizarGrupos(btn) {
   } catch (err) {
     mostrarAviso('Erro ao atualizar grupos: ' + err.message);
   }
-  btn.disabled = false; btn.textContent = 'ðŸ”„ Atualizar lista de grupos';
+  btn.disabled = false; btn.textContent = '🔄 Atualizar lista de grupos';
 }
 
 function aplicarSelecao() {
@@ -317,7 +317,7 @@ function limparSelecao() {
   document.querySelectorAll('#gruposLista input[type=checkbox]').forEach((cb) => (cb.checked = false));
   atualizarContador();
   salvarGrupos();
-  toast('SeleÃ§Ã£o limpa!');
+  toast('Seleção limpa!');
 }
 
 async function salvarConfig() {
@@ -330,7 +330,7 @@ async function salvarConfig() {
 
 function abrirPasta() {
   const pasta = document.getElementById('pastaArquivos').value;
-  window.open('http://localhost:3000/abrir-pasta?caminho=' + encodeURIComponent(pasta));
+  fetch('http://localhost:3000/abrir-pasta?caminho=' + encodeURIComponent(pasta));
 }
 
 function renderArquivo(e) {
@@ -339,17 +339,17 @@ function renderArquivo(e) {
   campo.value = e.config.arquivo || '';
   if (e.arquivo) {
     const automatico = !(e.config.arquivo && e.config.arquivo.trim() !== '');
-    el.innerHTML = `ðŸ“„ Arquivo que serÃ¡ enviado: <b>${e.arquivo.nome}</b>` +
-      (automatico ? ' <span class="tag" style="background:#14532d;color:#86efac">AUTO</span>' : ' <span class="tag teste">ESPECÃFICO</span>');
+    el.innerHTML = `📄 Arquivo que será enviado: <b>${e.arquivo.nome}</b>` +
+      (automatico ? ' <span class="tag" style="background:#14532d;color:#86efac">AUTO</span>' : ' <span class="tag teste">ESPECÍFICO</span>');
   } else {
-    el.innerHTML = `âš ï¸ Nenhum arquivo (Excel/PDF) encontrado em <b>${e.config.pastaArquivos}</b> â€” coloque o arquivo do dia na pasta.`;
+    el.innerHTML = `⚠️ Nenhum arquivo (Excel/PDF) encontrado em <b>${e.config.pastaArquivos}</b> — coloque o arquivo do dia na pasta.`;
   }
 }
 
 async function salvarArquivoEspecifico(btn) {
   const valor = document.getElementById('arquivoEspecifico').value;
   if (valor.trim() !== '' && !/^(xlsx|xlsm|xls|pdf|jpe?g|png|webp)$/i.test(valor.split('.').pop())) {
-    mostrarAviso('Formato nÃ£o suportado â€” use .xlsx, .xls, .pdf ou imagem (jpg/png/webp)');
+    mostrarAviso('Formato não suportado — use .xlsx, .xls, .pdf ou imagem (jpg/png/webp)');
     return;
   }
   await api('/api/config', { arquivo: valor });
@@ -362,14 +362,14 @@ async function limparArquivoEspecifico(btn) {
   await api('/api/config', { arquivo: '' });
   const e = await api('/api/estado');
   renderArquivo(e);
-  toast('De volta ao automÃ¡tico!');
+  toast('De volta ao automático!');
 }
 
 function renderExtras(e) {
   const el = document.getElementById('extrasLista');
   const extras = e.arquivosExtras || [];
   el.innerHTML = extras.map((a, i) =>
-    `<div style="display:flex;align-items:center;gap:8px;background:#0a1120;border:1px solid #2a3b58;border-radius:8px;padding:7px 10px;margin-bottom:4px;font-size:13px"><span>ðŸ“Ž</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.nome}</span><button class="cinza" style="padding:4px 10px;font-size:11px;flex:none" onclick="removerExtra(${i})">âœ•</button></div>`
+    `<div style="display:flex;align-items:center;gap:8px;background:#0a1120;border:1px solid #2a3b58;border-radius:8px;padding:7px 10px;margin-bottom:4px;font-size:13px"><span>📎</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.nome}</span><button class="cinza" style="padding:4px 10px;font-size:11px;flex:none" onclick="removerExtra(${i})">✕</button></div>`
   ).join('');
 }
 
@@ -378,7 +378,7 @@ async function adicionarExtra(btn) {
   if (v === '') { mostrarAviso('Cole o caminho completo do arquivo.'); return; }
   const ext = v.split('.').pop().toLowerCase();
   if (!['xlsx', 'xlsm', 'xls', 'pdf', 'jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
-    mostrarAviso('Formato nÃ£o suportado â€” use .xlsx, .xls, .pdf ou imagem (jpg/png/webp)');
+    mostrarAviso('Formato não suportado — use .xlsx, .xls, .pdf ou imagem (jpg/png/webp)');
     return;
   }
   const e = await api('/api/estado');
@@ -449,13 +449,13 @@ async function salvarAgendamento(btn) {
 function renderAgenda(config) {
   document.getElementById('horario').value = config.horarioEnvio || '';
   document.getElementById('agendaEstado').textContent = config.horarioEnvio
-    ? `âœ… Ativo â€” dispara todo dia Ã s ${config.horarioEnvio}`
-    : 'â›” Desativado';
+    ? `✅ Ativo — dispara todo dia às ${config.horarioEnvio}`
+    : '⛔ Desativado';
 }
 
 function mostrarAviso(msg) {
   const el = document.getElementById('aviso');
-  el.textContent = 'âš ï¸ ' + msg;
+  el.textContent = '⚠️ ' + msg;
   el.style.display = 'block';
   toast(msg);
 }
@@ -464,7 +464,7 @@ function esconderAviso() {
 }
 function toast(msg) {
   const el = document.getElementById('toast');
-  el.textContent = 'âœ… ' + msg;
+  el.textContent = '✅ ' + msg;
   el.style.display = 'block';
   clearTimeout(el._t);
   el._t = setTimeout(() => (el.style.display = 'none'), 2600);
@@ -480,18 +480,18 @@ function renderJob(job) {
   document.getElementById('btnTeste').disabled = job.ativo;
 
   const tagEl = document.getElementById('progTag');
-  tagEl.innerHTML = job.modo === 'teste' ? '<span class="tag teste">SIMULAÃ‡ÃƒO</span>' : '<span class="tag real">ENVIO REAL</span>';
+  tagEl.innerHTML = job.modo === 'teste' ? '<span class="tag teste">SIMULAÇÃO</span>' : '<span class="tag real">ENVIO REAL</span>';
 
   const pct = job.total ? Math.round(((job.ok + job.falha) / job.total) * 100) : 0;
   document.getElementById('barraFill').style.width = pct + '%';
 
   let texto = '';
-  if (job.status === 'preparando') texto = 'â³ Preparando...';
-  else if (job.status === 'pausa') texto = `â˜• Pausa de ${job.resultado || '10'} min... (${job.indice}/${job.total})`;
-  else if (job.status === 'concluido') texto = job.modo === 'teste' ? 'âœ… SimulaÃ§Ã£o concluÃ­da' : `âœ… ConcluÃ­do: ${job.ok}/${job.total} enviados${job.falha ? ', ' + job.falha + ' falhas' : ''}`;
-  else if (job.status === 'interrompido') texto = `â¹ Interrompido: ${job.ok}/${job.total} enviados`;
-  else if (job.status === 'erro') texto = 'âŒ Erro: ' + (job.resultado?.erro || '');
-  else texto = `ðŸ“¤ Enviando ${job.indice}/${job.total}: ${job.atual}`;
+  if (job.status === 'preparando') texto = '⏳ Preparando...';
+  else if (job.status === 'pausa') texto = `☕ Pausa de ${job.resultado || '10'} min... (${job.indice}/${job.total})`;
+  else if (job.status === 'concluido') texto = job.modo === 'teste' ? '✅ Simulação concluída' : `✅ Concluído: ${job.ok}/${job.total} enviados${job.falha ? ', ' + job.falha + ' falhas' : ''}`;
+  else if (job.status === 'interrompido') texto = `⏹ Interrompido: ${job.ok}/${job.total} enviados`;
+  else if (job.status === 'erro') texto = '❌ Erro: ' + (job.resultado?.erro || '');
+  else texto = `📤 Enviando ${job.indice}/${job.total}: ${job.atual}`;
 
   document.getElementById('progTexto').textContent = texto;
 
@@ -499,7 +499,7 @@ function renderJob(job) {
   if (job.modo === 'teste' && job.resultado) {
     const nomes = job.resultado.arquivos || [job.resultado.arquivo];
     detalhe = `Arquivos: ${nomes.join(' + ')}\nMensagem: ${job.resultado.mensagem}\nAlvos (${job.resultado.alvos.length}):\n` +
-      job.resultado.alvos.map((a) => ' â€¢ ' + a.nome).join('\n');
+      job.resultado.alvos.map((a) => ' • ' + a.nome).join('\n');
   } else if (job.resultado && job.resultado.erros && job.resultado.erros.length) {
     detalhe = 'Falhas:\n' + job.resultado.erros.join('\n');
   } else if (job.resultado && job.resultado.erro) {
@@ -532,7 +532,7 @@ async function carregarEstado() {
     document.getElementById('logBox').textContent = (e.log || []).join('\n');
     esconderAviso();
   } catch (_) {
-    setStatus({ conexao: 'desconectado', ultimoErro: 'Sem resposta do servidor â€” o app estÃ¡ aberto?' });
+    setStatus({ conexao: 'desconectado', ultimoErro: 'Sem resposta do servidor — o app está aberto?' });
   }
 }
 
@@ -541,4 +541,3 @@ carregarEstado();
 </script>
 </body>
 </html>
-

@@ -17,12 +17,23 @@ process.on('unhandledRejection', (erro) => {
 
 (function verificarInstanciaUnica() {
   const ARQ_LOCK = path.join(DIR, 'servidor.lock');
-  let recente = false;
-  try {
-    const st = fs.statSync(ARQ_LOCK);
-    recente = Date.now() - st.mtimeMs < 15000;
-  } catch (_) {}
-  if (recente) {
+
+  function pidVivo(pid) {
+    try { process.kill(pid, 0); return true; } catch (e) { return e.code === 'EPERM'; }
+  }
+
+  function lockDeInstanciaViva() {
+    try {
+      const st = fs.statSync(ARQ_LOCK);
+      if (Date.now() - st.mtimeMs >= 15000) return false;
+      const pid = parseInt(fs.readFileSync(ARQ_LOCK, 'utf-8').trim(), 10);
+      return Number.isFinite(pid) && pid !== process.pid && pidVivo(pid);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  if (lockDeInstanciaViva()) {
     console.log('Ja existe um servidor do Disparador Pro no ar. Esta instancia sera encerrada.');
     process.exit(0);
   }
