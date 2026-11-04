@@ -78,7 +78,9 @@ function delayAleatorio(config) {
 }
 
 function selecionarArquivo(config) {
-  if (config.arquivo && config.arquivo.trim() !== '') return config.arquivo;
+  if (config.arquivo && config.arquivo.trim() !== '' && fs.existsSync(config.arquivo)) {
+    return config.arquivo;
+  }
   const pasta = config.pastaArquivos;
   if (!pasta || !fs.existsSync(pasta)) return null;
   const arquivos = fs
