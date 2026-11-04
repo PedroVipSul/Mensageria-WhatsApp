@@ -16,6 +16,10 @@ const MIMES = {
   '.xlsm': 'application/vnd.ms-excel.sheet.macroEnabled.12',
   '.xls': 'application/vnd.ms-excel',
   '.pdf': 'application/pdf',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
 };
 
 const CONFIG_PADRAO = {
@@ -78,7 +82,7 @@ function selecionarArquivo(config) {
   if (!pasta || !fs.existsSync(pasta)) return null;
   const arquivos = fs
     .readdirSync(pasta)
-    .filter((f) => /\.(xlsx|xlsm|xls|pdf)$/i.test(f))
+    .filter((f) => /\.(xlsx|xlsm|xls|pdf|jpe?g|png|webp)$/i.test(f))
     .map((f) => {
       const caminho = path.join(pasta, f);
       return { caminho, mtime: fs.statSync(caminho).mtime.getTime() };
@@ -195,8 +199,14 @@ async function enviarArquivo(dir, getSock, config, alvos, listaArquivos, opcoes 
         break;
       }
       try {
-        const payload = { document: buffers[i].buffer, mimetype: buffers[i].mime, fileName: buffers[i].nome };
-        if (i === 0 && texto) payload.caption = texto;
+        const legenda = i === 0 ? texto : '';
+        let payload;
+        if (buffers[i].mime.startsWith('image/')) {
+          payload = { image: buffers[i].buffer, caption: legenda };
+        } else {
+          payload = { document: buffers[i].buffer, mimetype: buffers[i].mime, fileName: buffers[i].nome };
+          if (legenda) payload.caption = legenda;
+        }
         await sock.sendMessage(chat.id, payload);
         log(`[${indice}/${alvos.length}] OK -> ${chat.nome} (${buffers[i].nome})`, dir);
       } catch (erro) {
