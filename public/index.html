@@ -304,12 +304,12 @@ function marcar46() {
 function marcarCuritiba() {
   for (const g of gruposCarregados) {
     const n = g.nome.toUpperCase().replace(/[-\s]+/g, ' ');
-    if (n.includes('VST PR') && !n.includes('PAP') && !n.includes('SUPORTE') && !n.includes('INTERNO')) {
+    if (n.includes('VST PR') && !n.includes('PAP') && !n.includes('SUPORTE') && !n.includes('INTERNO') && !n.includes('46')) {
       gruposSelecionados.add(g.id);
     }
   }
   aplicarSelecao();
-  toast('Parceiros Curitiba adicionados!');
+  toast('Parceiros Curitiba (sem 46) adicionados!');
 }
 
 function limparSelecao() {
