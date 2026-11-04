@@ -348,8 +348,8 @@ function renderArquivo(e) {
 
 async function salvarArquivoEspecifico(btn) {
   const valor = document.getElementById('arquivoEspecifico').value;
-  if (valor.trim() !== '' && !/^(xlsx|xlsm|xls|pdf|jpe?g|png|webp)$/i.test(valor.split('.').pop())) {
-    mostrarAviso('Formato não suportado — use .xlsx, .xls, .pdf ou imagem (jpg/png/webp)');
+  if (valor.trim() !== '' && !/^(xlsx|xlsm|xls|pdf|jpe?g|jfif|png|webp)$/i.test(valor.split('.').pop())) {
+    mostrarAviso('Formato não suportado — use .xlsx, .xls, .pdf, imagem (jpg/png/webp) ou .jfif');
     return;
   }
   await api('/api/config', { arquivo: valor });
@@ -377,8 +377,8 @@ async function adicionarExtra(btn) {
   const v = document.getElementById('extraCaminho').value.trim();
   if (v === '') { mostrarAviso('Cole o caminho completo do arquivo.'); return; }
   const ext = v.split('.').pop().toLowerCase();
-  if (!['xlsx', 'xlsm', 'xls', 'pdf', 'jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
-    mostrarAviso('Formato não suportado — use .xlsx, .xls, .pdf ou imagem (jpg/png/webp)');
+  if (!['xlsx', 'xlsm', 'xls', 'pdf', 'jpg', 'jpeg', 'jfif', 'png', 'webp'].includes(ext)) {
+    mostrarAviso('Formato não suportado — use .xlsx, .xls, .pdf, imagem (jpg/png/webp) ou .jfif');
     return;
   }
   const e = await api('/api/estado');

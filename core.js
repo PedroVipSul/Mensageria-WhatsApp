@@ -18,6 +18,7 @@ const MIMES = {
   '.pdf': 'application/pdf',
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
+  '.jfif': 'image/jpeg',
   '.png': 'image/png',
   '.webp': 'image/webp',
 };
@@ -82,7 +83,7 @@ function selecionarArquivo(config) {
   if (!pasta || !fs.existsSync(pasta)) return null;
   const arquivos = fs
     .readdirSync(pasta)
-    .filter((f) => /\.(xlsx|xlsm|xls|pdf|jpe?g|png|webp)$/i.test(f))
+    .filter((f) => /\.(xlsx|xlsm|xls|pdf|jpe?g|jfif|png|webp)$/i.test(f))
     .map((f) => {
       const caminho = path.join(pasta, f);
       return { caminho, mtime: fs.statSync(caminho).mtime.getTime() };
