@@ -16,8 +16,23 @@ process.on('unhandledRejection', (erro) => {
 });
 
 (function verificarInstanciaUnica() {
+  const ARQ_LOCK = path.join(DIR, 'servidor.lock');
+  let recente = false;
+  try {
+    const st = fs.statSync(ARQ_LOCK);
+    recente = Date.now() - st.mtimeMs < 15000;
+  } catch (_) {}
+  if (recente) {
+    console.log('Ja existe um servidor do Disparador Pro no ar. Esta instancia sera encerrada.');
+    process.exit(0);
+  }
+  try { fs.writeFileSync(ARQ_LOCK, String(process.pid)); } catch (_) {}
+  setInterval(() => {
+    try { fs.writeFileSync(ARQ_LOCK, String(process.pid)); } catch (_) {}
+  }, 10000).unref();
+
   const teste = net.connect(PORTA, '127.0.0.1');
-  teste.setTimeout(2000);
+  teste.setTimeout(1500);
   teste.on('connect', () => {
     teste.destroy();
     console.log('Ja existe um servidor do Disparador Pro no ar. Esta instancia sera encerrada.');
