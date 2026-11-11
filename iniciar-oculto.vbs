@@ -3,10 +3,31 @@ Set sh = CreateObject("WScript.Shell")
 pasta = fso.GetParentFolderName(WScript.ScriptFullName)
 sh.CurrentDirectory = pasta
 
-node = pasta & "\node.exe"
-If Not fso.FileExists(node) Then node = sh.ExpandEnvironmentStrings("%ProgramFiles%") & "\nodejs\node.exe"
-sh.Run """" & node & """ server.js", 0, False
-WScript.Sleep 5000
+' verifica se o servidor ja esta no ar antes de religar
+jaRodando = False
+On Error Resume Next
+Set http = CreateObject("MSXML2.XMLHTTP")
+http.open "GET", "http://localhost:3000/api/estado", False
+http.send
+If Err.Number = 0 And http.Status = 200 Then jaRodando = True
+Err.Clear
+On Error GoTo 0
+
+' segunda checagem: batimento do servidor.lock (nao depende de proxy/rede)
+If Not jaRodando Then
+  If fso.FileExists(pasta & "\servidor.lock") Then
+    Set lockFile = fso.GetFile(pasta & "\servidor.lock")
+    segundos = DateDiff("s", lockFile.DateLastModified, Now)
+    If segundos < 60 And segundos > -120 Then jaRodando = True
+  End If
+End If
+
+If Not jaRodando Then
+  node = pasta & "\node.exe"
+  If Not fso.FileExists(node) Then node = sh.ExpandEnvironmentStrings("%ProgramFiles%") & "\nodejs\node.exe"
+  sh.Run """" & node & """ server.js", 0, False
+  WScript.Sleep 5000
+End If
 
 chrome = ""
 candidatos = Array( _
