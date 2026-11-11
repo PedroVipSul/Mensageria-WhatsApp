@@ -364,3 +364,22 @@ app.listen(PORTA, '127.0.0.1', () => {
   }
   throw erro;
 });
+
+// O servidor vivo e o dono da porta: qualquer outro "node server.js" e um zumbi.
+// Sniper: a cada 60s mata os outros e registra no log quem eram (com o pai).
+setInterval(() => {
+  const cp = require('child_process');
+  const cmd = "Get-CimInstance Win32_Process -Filter \"Name='node.exe'\" | Where-Object { $_.CommandLine -like '*server.js*' -and $_.ProcessId -ne " + process.pid + " } | ForEach-Object { Write-Output ($_.ProcessId.ToString() + '|' + $_.ParentProcessId.ToString() + '|' + $_.CreationDate.ToString('s')) }";
+  cp.exec('powershell -NoProfile -Command "' + cmd.replace(/"/g, '\\"') + '"', { windowsHide: true }, (err, stdout) => {
+    const linhas = (stdout || '').trim().split('\n').filter((l) => l.trim() !== '');
+    for (const linha of linhas) {
+      const partes = linha.split('|');
+      const pid = parseInt(partes[0], 10);
+      if (!Number.isFinite(pid)) continue;
+      try { process.kill(pid, 'KILL'); } catch (_) {}
+      try {
+        fs.appendFileSync(path.join(DIR, 'disparo.log'), '[' + new Date().toLocaleString('pt-BR') + '] SNIPER: zumbi ' + partes[0] + ' (pai ' + partes[1] + ', nascido ' + partes[2] + ') eliminado\n');
+      } catch (_) {}
+    }
+  });
+}, 60000).unref();
