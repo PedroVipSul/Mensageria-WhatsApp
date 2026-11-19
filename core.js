@@ -23,6 +23,11 @@ const MIMES = {
   '.webp': 'image/webp',
 };
 
+// arquivos voláteis (logs/lock/cache) vivem FORA da pasta do projeto:
+// Documents pode ser sincronizado pelo OneDrive e travar escritas sincronas.
+const DIRETORIO_DADOS = path.join(process.env.APPDATA || os.homedir(), 'DisparadorPro');
+try { fs.mkdirSync(DIRETORIO_DADOS, { recursive: true }); } catch (_) {}
+
 const CONFIG_PADRAO = {
   pastaArquivos: path.join(os.homedir(), 'Desktop', 'Disparos WhatsApp'),
   arquivo: '',
@@ -42,7 +47,7 @@ function caminhoConfig(dir) {
 }
 
 function caminhoLog(dir) {
-  return path.join(dir, 'disparo.log');
+  return path.join(DIRETORIO_DADOS, 'disparo.log');
 }
 
 function carregarConfig(dir) {
@@ -123,7 +128,7 @@ async function listarGrupos(sock) {
 }
 
 function caminhoCacheGrupos(dir) {
-  return path.join(dir, 'grupos-cache.json');
+  return path.join(DIRETORIO_DADOS, 'grupos-cache.json');
 }
 
 function salvarCacheGrupos(dir, grupos) {

@@ -2,6 +2,7 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 Set sh = CreateObject("WScript.Shell")
 pasta = fso.GetParentFolderName(WScript.ScriptFullName)
 sh.CurrentDirectory = pasta
+caminhoLock = sh.ExpandEnvironmentStrings("%APPDATA%") & "\DisparadorPro\servidor.lock"
 
 ' verifica se o servidor ja esta no ar antes de religar
 jaRodando = False
@@ -15,8 +16,8 @@ On Error GoTo 0
 
 ' segunda checagem: batimento do servidor.lock (nao depende de proxy/rede)
 If Not jaRodando Then
-  If fso.FileExists(pasta & "\servidor.lock") Then
-    Set lockFile = fso.GetFile(pasta & "\servidor.lock")
+  If fso.FileExists(caminhoLock) Then
+    Set lockFile = fso.GetFile(caminhoLock)
     segundos = DateDiff("s", lockFile.DateLastModified, Now)
     If segundos < 60 And segundos > -120 Then jaRodando = True
   End If

@@ -1,7 +1,7 @@
-$PORTA = 3000
+﻿$PORTA = 3000
 $PASTA = "C:\Users\Owner\Documents\Default Project\whatsapp-envio"
-$arquivoFalhas = Join-Path $PASTA "vigia-falhas.txt"
-$registroVigia = Join-Path $PASTA "vigia-log.txt"
+$arquivoFalhas = Join-Path $env:APPDATA "DisparadorPro\vigia-falhas.txt"
+$registroVigia = Join-Path $env:APPDATA "DisparadorPro\vigia-log.txt"
 
 function Registrar($msg) {
   try { Add-Content $registroVigia ("[" + (Get-Date -Format "dd/MM HH:mm:ss") + "] " + $msg) -ErrorAction SilentlyContinue } catch {}
@@ -66,3 +66,4 @@ try {
   try { $mutex.ReleaseMutex() | Out-Null } catch {}
   $mutex.Dispose()
 }
+
