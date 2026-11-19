@@ -100,7 +100,7 @@ function selecionarArquivo(config) {
 }
 
 function pastaSessao(dir) {
-  return path.join(dir, 'sessao-baileys');
+  return path.join(DIRETORIO_DADOS, 'sessao-baileys');
 }
 
 async function criarSocket(dir, eventos) {
